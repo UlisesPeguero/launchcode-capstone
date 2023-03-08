@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html th:replace="~{layouts/mainLayout :: layout(~{:: #otherResources}, ~{:: #content})}" xmlns:th="http://www.thymeleaf.org">
+<head>
+   <meta charset="UTF-8">
+   <title>Title</title>
+   <th:block id="otherResources">
+      <link rel="stylesheet" href="https://unpkg.com/bootstrap-table@1.21.2/dist/bootstrap-table.min.css">
+      <script src="https://unpkg.com/bootstrap-table@1.21.2/dist/bootstrap-table.min.js"></script>
+      <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.1/index.global.min.js'></script>
+      <script src='https://cdn.jsdelivr.net/npm/@fullcalendar/bootstrap5@6.1.1/index.global.min.js'></script>
+      <script th:src="@{/js/uiCalendar.js}"></script>
+
+      <script th:inline="javascript">
+        document.addEventListener('DOMContentLoaded',function(){
+                    uiCalendar([[${reservations}]]);
+        });
+         </script>
+   </th:block>
+
+</head>
+<body>
+<th:block id="content" class="position-relative">
+   <!--        CALENDAR UI | DISPLAYS A SCHEDULER FOR RESERVATIONS-->
+   <div id='calendar'></div>
+   <!--        *********************-->
+</th:block>
+</body>
+</html>

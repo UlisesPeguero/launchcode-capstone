@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html th:replace="~{layouts/mainLayout :: layout(~{:: #otherResources}, ~{:: #content})}" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <th:block id="otherResources">
+        <link rel="stylesheet" href="https://unpkg.com/bootstrap-table@1.21.2/dist/bootstrap-table.min.css">
+        <script src="https://unpkg.com/bootstrap-table@1.21.2/dist/bootstrap-table.min.js"></script>
+        <script th:src="@{/js/uiUtils.js}"></script>
+    </th:block>
+</head>
+<body>
+    <th:block id="content">
+        <div id="toolbar" class="d-flex">
+            <a class="btn btn-primary" th:href="@{/reservations/create?checkInOnSave=true}" title="Register a new stay">
+                <i class="bi bi-plus-lg"></i>
+                <span class="d-none d-sm-inline">Add Stay</span>
+            </a>
+            <div class="vr mx-2 d-none"></div>
+            <div class="btn-group d-none" role="group" aria-label="Change view">
+                <input type="radio" id="btnCalendar" class="btn-check" autocomplete="off" onclick="location.href='/stays'">
+                <label for="btnCalendar" class="btn btn-primary" title="Change to calendar view" ><i class="bi-calendar-week"></i></label>
+                <input type="radio" id="btnGrid" class="btn-check" autocomplete="off">
+                <label for="btnGrid" class="btn btn-outline-primary disabled"><i class="bi-table"></i></label>
+            </div>
+        </div>
+        <table
+                id="staysTable"
+                data-toggle="table"
+                data-search="true"
+                data-pagination="true"
+                data-show-columns="true"
+                data-show-toggle="true"
+                data-toolbar="#toolbar"
+                th:data-buttons="${showAll} ? 'tableFilterShowActive' : 'tableFilterShowAll'"
+                class="table-striped">
+            <thead>
+            <tr>
+                <th data-halign="center" data-align="center" data-sortable="true">#</th>
+                <th data-halign="center" data-align="center" data-sortable="true">Check-In</th>
+                <th data-halign="center" data-align="center" data-sortable="true" data-visible="false">Check-Out</th>
+                <th data-halign="center" data-align="center" data-sortable="true">From</th>
+                <th data-halign="center" data-align="center" data-sortable="true">To</th>
+                <th data-halign="center" data-sortable="true" data-visible="false">Pet owner</th>
+                <th data-halign="center" data-sortable="true">Pet</th>
+                <th data-halign="center" data-sortable="true">Service</th>
+                <th data-halign="center" data-align="center" data-sortable="true">Kennel</th>
+                <th data-halign="center" data-sortable="true">Caretaker</th>
+                <th data-align="center" data-sortable="true">Status</th>
+                <th data-halign="center" data-align="center">Actions</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="stay: ${stays}" th:Object="${stay}" th:class="*{active} ? null : 'inactive'">
+                <td><a class="fw-semibold link-primary" th:href="@{/reservations/detail?reservationId={reservationId} (reservationId=*{reservation.id})}"
+                       th:text="*{reservation.confirmation}"></a></td>
+                <td th:text="*{#dates.format(checkInTime, 'MM/dd/yyyy HH:mm:ss')}"></td>
+                <td th:text="*{#dates.format(checkOutTime, 'MM/dd/yyyy HH:mm:ss')}"></td>
+                <td th:text="*{#dates.format(reservation.startDateTime, 'MM/dd/yyyy')}"></td>
+                <td th:text="*{#dates.format(reservation.endDateTime, 'MM/dd/yyyy')}"></td>
+                <td><a class="link-primary" th:href="@{/owners/profile/{id} (id=*{reservation.pet.owner.id})}"
+                       th:text="*{reservation.pet.owner.getFullName()}"></a></td>
+                <td><a class="link-primary" th:href="@{/pets/profile/{id} (id=*{reservation.pet.id})}"
+                       th:text="*{reservation.pet.petName}"></a></td>
+                <td th:text="*{reservation.service.name}"></td>
+                <td th:text="*{kennel.name}"></td>
+                <td><a class="link-primary" th:href="@{/employees/profile/{id} (id=*{employee.id})}"
+                       th:text="*{employee.getFullName()}"></a></td>
+                <td><span class="status-indicator bg-gradient" th:title="*{status.name}" th:style="|background-color: *{status.color}|"></span></td>
+                <td>
+                    <a class="btn btn-sm btn-primary" th:classappend="*{invoice} ? 'disabled' : null"
+                       th:href="|javascript:openConfirmationDialog('Do you wish to start the check-out process for #<strong>${stay.reservation.confirmation}</strong>?', '/stays/checkout/${stay.id}')|"
+                       title="Checkout"><i class="bi-receipt"></i></a>
+                    <a class="btn btn-sm btn-primary" th:href="@{/stays/update/{id}(id=*{id})}" title="Update/View"><i class="bi-pen"></i></a>
+                    <a class="btn btn-sm btn-danger"  title="Delete" th:href="|javascript:openDeleteDialog('*{reservation.confirmation}','/stays', *{id});|"><i class="bi-trash"></i></a>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </th:block>
+</body>
+</html>

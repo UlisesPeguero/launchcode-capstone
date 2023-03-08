@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html th:replace="~{layouts/mainLayout :: layout(~{:: #otherResources}, ~{:: #content})}" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <th:block id="otherResources">
+        <link rel="stylesheet" href="https://unpkg.com/bootstrap-table@1.21.2/dist/bootstrap-table.min.css">
+        <script src="https://unpkg.com/bootstrap-table@1.21.2/dist/bootstrap-table.min.js"></script>
+    </th:block>
+</head>
+<body>
+<th:block id="content" class="position-relative">
+
+        <div id="toolbar">
+            <a class="btn btn-primary" th:href="@{owners/add}">
+                <i class="bi bi-plus-lg"></i>
+                <span class="d-none d-sm-inline">Add Owner</span>
+            </a>
+        </div>
+
+        <table class="text-capitalize"
+               data-toolbar="#toolbar"
+               id="ownerTable"
+               data-toggle="table"
+               data-search="true"
+               data-show-search-button="true"
+               data-pagination="true"
+               data-show-columns="true"
+               data-show-toggle="true">
+            <thead>
+                <tr>
+                    <th data-halign="center" data-sortable="true">Name</th>
+                    <th data-halign="center" data-sortable="true">Address</th>
+                    <th data-halign="center" data-sortable="true">Address 2</th>
+                    <th data-halign="center" data-sortable="true">Phone Number</th>
+                    <th data-halign="center" data-sortable="true">Email</th>
+                    <th data-halign="center" data-sortable="true">Pets</th>
+                    <th data-halign="center" data-sortable="true">Notes</th>
+                    <th data-halign="center">Actions</th>
+                </tr>
+                </thead>
+            <tbody>
+                <tr th:each="owner: ${owners}" th:object="${owner}">
+                    <td>
+                        <a th:href="@{/owners/profile/{id} (id=*{id})}" th:text="*{getFullName()}"></a>
+                    </td>
+                    <td th:text="${owner.address}"></td>
+                    <td th:text="${owner.address2}"></td>
+                    <td th:text="${owner.phoneNumber}"></td>
+                    <td th:text="${owner.email}"></td>
+                    <td th:if="${#lists.isEmpty(owner.pets)}" style="color:#FF0000"> No Pets</td>  <!--- Keeps table aligned if no pets exist, red Text --->
+                    <td th:if="${not #lists.isEmpty(owner.pets)}"><p th:each="pet : ${owner.pets}"th:text="${pet.petName}"></p></td>
+                    <td th:text="${owner.notes}"></td>
+                <td>
+                    <a th:href="@{'owners/updateOwner/' + ${owner.id}}" class="btn btn-sm btn-primary"/><i class="bi bi-pen"></i></a>
+                    <a th:href="@{'showNewPetForm/' + ${owner.id}}" class="btn btn-sm btn-primary" >Add Pet</a>
+                    <a th:href="@{'owners/' + ${owner.id}}" class="btn btn-sm btn-danger"/> <i class="bi bi-trash"></i></a>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+</th:block>
+</body>
+</html>

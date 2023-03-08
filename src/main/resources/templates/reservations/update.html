@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html th:replace="~{layouts/mainLayout :: layout(~{:: #otherResources}, ~{:: #content})}" xmlns:th="http://www.thymeleaf.org">
+<head>
+   <meta charset="UTF-8">
+   <title>Title</title>
+   <th:block id="otherResources">
+      <link rel="stylesheet" href="https://unpkg.com/bootstrap-table@1.21.2/dist/bootstrap-table.min.css">
+      <script src="https://unpkg.com/bootstrap-table@1.21.2/dist/bootstrap-table.min.js"></script>
+   </th:block>
+
+</head>
+<body>
+<th:block id="content" >
+   <div class="col-md-12 col-lg-10 col-xl-8 col-xxl-6">
+    <form method="post">
+       <div class="row g-2 py-2">
+          <input type="hidden" id="id" th:field="${reservation.id}">
+          <input type="hidden" id="confirmation" th:field="${reservation.confirmation}">
+          <input type="hidden" id="pet" th:field="${reservation.pet}">
+          <div class="form-group col-6 res">
+             <label class="form-label">Confirmation Code</label>
+             <input class="form-control fw-semibold" disabled th:value="${reservation.confirmation}">
+          </div>
+          <div class="form-group col-6 res">
+             <label class="form-label">Owner</label>
+             <input class="form-control" disabled th:value="${reservation.getPet().getOwner().getFullName()}">
+          </div>
+          <div class="form-group col-6 res">
+             <label class="form-label">Contact</label>
+             <input class="form-control" disabled th:value="${reservation.getPet().getOwner().getEmail()}">
+          </div>
+          <div class="form-group col-6 res">
+             <label class="form-label">Pet</label>
+             <input class="form-control" disabled th:value="${reservation.getPet().petName}">
+          </div>
+          <div class="form-group col-12 res">
+             <label class="form-label">Service</label>
+             <div class="input-group has-validation">
+                   <select id="service" th:field="${reservation.service}" class="form-select" th:errorclass="is-invalid" required>
+                      <option th:each="service: ${services}"
+                              th:value="${service.id}"
+                              th:text="${service.name}">
+                      </option>
+                   </select>
+                   <div id="validationServiceFeedback" class="invalid-feedback" th:errors="${reservation.service}"></div>
+                </div>
+          </div>
+          <div class="form-group col-sm-3 res">
+             <label class="form-label">Start Date</label>
+             <input th:field="${reservation.startDateTime}" type="date" class="form-control" id="startDate" name="date" data-date-format="mm/dd/yyyy">
+
+             <p class="error" th:errors="${reservation.startDateTime}"></p>
+          </div>
+          <div class="form-group col-sm-3 res">
+             <label class="form-label">End Date</label>
+             <input th:field="${reservation.endDateTime}" type="date" class="form-control" id="endDate" name="date" data-date-format="mm/dd/yyyy">
+             <p class="error" th:errors="${reservation.endDateTime}"></p>
+          </div>
+          <div class="form-group col-12 res">
+             <label class="form-label">Comments</label>
+             <textarea th:field="${reservation.comments}" rows="3" class="form-control"></textarea>
+             <p class="error" th:errors="${reservation.comments}"></p>
+          </div>
+          <div class="form-group col-3 res">
+             <label class="form-label">Status</label>
+                <div class="input-group has-validation">
+                   <select id="status" th:field="${reservation.status}" class="form-select" th:errorclass="is-invalid" required>
+                      <option th:each="status: ${statuses}"
+                              th:value="${status.id}"
+                              th:text="${status.name}">
+                      </option>
+                   </select>
+                   <div id="validationServerStatusFeedback" class="invalid-feedback" th:errors="${reservation.status}"></div>
+                </div>
+          </div>
+          <div class="form-group col-12 res">
+             <div class="form-check form-switch">
+                <label class="form-check-label" for="active">Active</label>
+                <input class="form-check-input" type="checkbox" role="switch" id="active" th:field="${reservation.active}">
+             </div>
+          </div>
+          <div class="form-group col-8 res">
+             <input type="submit" value="Save Changes" class="btn btn-success">
+             <a type="button" class="btn btn-secondary" href="/reservations/grid" title="Cancel reservation">
+                Cancel
+             </a>
+             <a class="btn btn-primary" th:classappend="${reservation.stay} ? 'disabled' : null" title="check in" th:href="@{'/stays/add?reservationId=' + ${reservation.id}}">Check-In</i></a>
+          </div>
+       </div>
+    </form>
+   </div>
+</th:block>
+</body>
+</html>

@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html th:replace="~{layouts/mainLayout :: layout(~{:: #otherResources}, ~{:: #content})}" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+  <th:block id="otherResources">
+    <link rel="stylesheet" href="https://unpkg.com/bootstrap-table@1.21.2/dist/bootstrap-table.min.css">
+  </th:block>
+</head>
+<body>
+<th:block id="content" class="position-relative">
+
+  <div id="toolbar">
+    <a class="btn btn-primary" th:href="@{/kennels}" title="Calendar view">
+      <span class="d-none d-sm-inline">Map view</span>
+    </a>
+  </div>
+
+  <table class="text-capitalize"
+         data-toolbar="#toolbar"
+         id="ownerTable"
+         data-toggle="table"
+         data-search="true"
+         data-show-search-button="true"
+         data-pagination="true"
+         data-show-columns="true"
+         data-show-toggle="true">
+    <thead>
+      <tr>
+        <th data-halign="center" data-sortable="true">Kennel Name</th>
+        <th data-halign="center" data-sortable="true">Pet Name</th>
+        <th data-halign="center" data-sortable="true">Start of stay</th>
+        <th data-halign="center" data-sortable="true">End of stay</th>
+        <th data-halign="center">Employee</th>
+        <th data-halign="center" data-sortable="true">Notes</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr th:each="kennel: ${kennels}">
+        <td th:text="${kennel.name}"></td>    <!-- If there is a stay with that kennel on the current date --->
+        <td th:each="stay:${stays}" th:if="${stay.kennel.id == kennel.id} and ${stay.reservation.startDateTime.before(TODAY)} and ${stay.reservation.endDateTime.after(TODAY)}" th:text="${stay.reservation.pet.petName}"></td>
+        <td th:each="stay:${stays}" th:if="${stay.kennel.id == kennel.id} and ${stay.reservation.startDateTime.before(TODAY)} and ${stay.reservation.endDateTime.after(TODAY)}" th:text="${stay.reservation.startDateTime}"></td>
+        <td th:each="stay:${stays}" th:if="${stay.kennel.id == kennel.id} and ${stay.reservation.startDateTime.before(TODAY)} and ${stay.reservation.endDateTime.after(TODAY)}" th:text="${stay.reservation.endDateTime}"></td>
+        <td th:each="stay:${stays}" th:if="${stay.kennel.id == kennel.id} and ${stay.reservation.startDateTime.before(TODAY)} and ${stay.reservation.endDateTime.after(TODAY)}" th:text="${stay.employee.getFullName()}"></td>
+        <td th:each="stay:${stays}" th:if="${stay.kennel.id == kennel.id} and ${stay.reservation.startDateTime.before(TODAY)} and ${stay.reservation.endDateTime.after(TODAY)}" th:text="${stay.reservation.comments}"></td>
+      </tr>
+    </tbody>
+  </table>
+  <script src="https://unpkg.com/bootstrap-table@1.21.2/dist/bootstrap-table.min.js"></script>
+</th:block>
+
+</body>
+</html>

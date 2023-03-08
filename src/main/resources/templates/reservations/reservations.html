@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html th:replace="~{layouts/mainLayout :: layout(~{:: #otherResources}, ~{:: #content})}" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <th:block id="otherResources">
+<!--        BOOTSTRAP FOR TABLE-->
+        <link rel="stylesheet" href="https://unpkg.com/bootstrap-table@1.21.2/dist/bootstrap-table.min.css">
+        <script src="https://unpkg.com/bootstrap-table@1.21.2/dist/bootstrap-table.min.js"></script>
+        <script th:src="@{/js/uiUtils.js}"></script>
+    </th:block>
+
+</head>
+<body>
+    <th:block id="content" class="position-relative">
+        <div id="toolbar">
+            <a class="btn btn-primary" th:href="@{/reservations/create}" title="Create reservation">
+                <i class="bi bi-plus-lg"></i>
+                <span class="d-none d-sm-inline">Create reservation</span>
+            </a>
+            <a class="btn btn-primary" th:href="@{/reservations}" title="Calendar view">
+                <span class="d-none d-sm-inline">Calendar view</span>
+            </a>
+        </div>
+        <table
+               id="reservationsTable"
+               data-toggle="table"
+               data-search="true"
+               data-pagination="true"
+               data-show-columns="true"
+               data-show-toggle="true"
+               data-toolbar="#toolbar"
+               th:data-buttons="${showAll} ? 'tableFilterShowActive' : 'tableFilterShowAll'"
+               class="table-striped">
+            <thead>
+            <tr>
+                <th data-align="center">Confirmation #</th>
+                <th>Owner</th>
+                <th data-visible="false">Contact</th>
+                <th>Pet</th>
+                <th>Service</th>
+                <th data-halign="center" data-align="center" data-sortable="true">Start Date</th>
+                <th data-halign="center" data-align="center" data-sortable="true">End Date</th>
+                <th data-visible="false">Comments</th>
+                <th data-align="center">Status</th>
+                <th data-halign="center" data-align="center">Actions</th>
+            </tr>
+            </thead>
+            <tbody>
+                <tr th:each="reservation : ${reservations}" th:class="*{reservation.active} ? null : 'inactive'">
+                    <td class="fw-bold" >
+                        <a class="link-primary" th:text="${reservation.confirmation}" th:href="@{'/reservations/detail?reservationId=' + ${reservation.id}}"></a>
+                    </td>
+                    <td th:text="${reservation.getPet().getOwner().getFullName()}"></td>
+                    <td th:text="${reservation.getPet().getOwner().getEmail()}"></td>
+                    <td th:text="${reservation.getPet().petName}"></td>
+                    <td th:text="${reservation.service.name}"></td>
+                    <td th:text="${#dates.format(reservation.startDateTime, 'MM/dd/yyyy')}"></td>
+                    <td th:text="${#dates.format(reservation.endDateTime, 'MM/dd/yyyy')}"></td>
+                    <td th:text="${reservation.comments}"></td>
+                    <td><span class="status-indicator bg-gradient" th:title="${reservation.status.name}" th:style="|background-color: ${reservation.status.color}|"></span></td>
+                    <td>
+                        <a class="btn btn-sm btn-primary" title="detail" th:href="@{'/reservations/detail?reservationId=' + ${reservation.id}}"><i class="bi bi-archive-fill"></i></a>
+                        <a class="btn btn-sm btn-primary" title="update" th:href="@{'/reservations/update?reservationId=' + ${reservation.id}}"><i class="bi bi-pen"></i></a>
+                        <a class="btn btn-sm btn-danger" title="delete" th:href="@{'/reservations/delete?reservationId=' + ${reservation.id}}"><i class="bi bi-trash"></i></a>
+                        <a class="btn btn-sm btn-primary" title="check in" th:classappend="*{reservation.stay} ? 'disabled' : null" th:href="@{'/stays/add?reservationId=' + ${reservation.id}}"><i class="bi bi-calendar-check"></i></a>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </th:block>
+</body>
+</html>

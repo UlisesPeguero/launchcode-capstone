@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html th:replace="~{layouts/mainLayout :: layout(~{:: #otherResources}, ~{:: #content})}" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <th:block id="otherResources">
+        <link rel="stylesheet" href="https://unpkg.com/bootstrap-table@1.21.2/dist/bootstrap-table.min.css">
+        <script src="https://unpkg.com/bootstrap-table@1.21.2/dist/bootstrap-table.min.js"></script>
+        <script src="/js/uiUtils.js"></script>
+    </th:block>
+</head>
+<body>
+<th:block id="content">
+    <h1>Add Owner</h1>
+
+    <form th:object="${owner}" method="post" style="max-width:600px;" enctype="multipart/form-data">
+        <div class="form-group">
+         <label th:for="firstName">First Name</label>
+            <input class="form-control" th:field="${owner.firstName}" />
+            <p th:errors="${owner.firstName}" class="error"></p>
+
+            <label th:for="lastName">Last Name</label>
+            <input class="form-control" th:field="${owner.lastName}" />
+            <p th:errors="${owner.lastName}" class="error"></p>
+
+            <label th:for="address">Address</label>
+            <input class="form-control" th:field="${owner.address}" />
+            <p th:errors="${owner.address}" class="error"></p>
+
+            <label th:for="address2">Address 2</label>
+            <input class="form-control" th:field="${owner.address2}" />
+
+            <label th:for="phoneNumber">Phone Number</label>
+            <input class="form-control" th:field="${owner.phoneNumber}" />
+            <p th:errors="${owner.phoneNumber}" class="error"></p>
+
+            <label th:for="email">Email</label>
+            <input class="form-control" th:field="${owner.email}" />
+            <p th:errors="${owner.email}" class="error"></p>
+
+            <div class="col-12 mb-3">
+                <label for="photo" class="form-label">Photo</label>
+                <input type="file" name="image" value="image" class="form-control" id="photo" onchange="displayPhotoPreview(event.target, 'photoPreview')" accept="image/png, image/jpeg">
+            </div>
+            <div class="col-md-6 d-flex justify-content-center align-content-center">
+                <input type="hidden" th:field="*{photo}">
+                <img id="photoPreview" alt="Photo preview" class="preview-photo img-thumbnail" th:style="*{photo} ? '' : 'display: none;'">
+            </div>
+
+            <label th:for="notes">Notes</label>
+            <input class="form-control" th:field="${owner.notes}" />
+        </div>
+
+        <input type="submit" value="Add Owner" />
+    </form>
+    <a th:href="@{/owners}">Return</a>
+</th:block>
+</body>
+</html>

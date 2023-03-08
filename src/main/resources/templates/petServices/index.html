@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html th:replace="~{layouts/mainLayout :: layout(~{:: #otherResources}, ~{:: #content})}" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <th:block id="otherResources">
+        <link rel="stylesheet" href="https://unpkg.com/bootstrap-table@1.21.2/dist/bootstrap-table.min.css">
+        <script src="https://unpkg.com/bootstrap-table@1.21.2/dist/bootstrap-table.min.js"></script>
+        <script th:src="@{/js/uiUtils.js}"></script>
+    </th:block>
+</head>
+<body>
+<th:block id="content">
+    <div id="toolbar" class="d-flex">
+        <a class="btn btn-primary" th:href="@{/invoices/petServices/add}" title="Open add service form">
+            <i class="bi bi-plus-lg"></i>
+            <span class="d-none d-sm-inline">Add Service</span>
+        </a>
+    </div>
+    <table id="usersTable"
+           data-toggle="table"
+           data-search="true"
+           data-pagination="true"
+           data-show-columns="true"
+           data-show-toggle="true"
+           data-toolbar="#toolbar"
+           th:data-buttons="${showAll} ? 'tableFilterShowActive' : 'tableFilterShowAll'"
+           class="table-striped">
+        <thead>
+        <tr>
+            <th data-halign="center">Service</th>
+            <th data-halign="center" data-sortable="true">Price</th>
+            <th data-halign="center" data-align="center">Actions</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="service: ${listServices}" th:object="${service}" th:class="*{active} ? null : 'inactive'">
+            <td th:text="*{name}"></td>
+            <td th:text="'$' + *{pricePerUnit}"></td>
+            <td>
+                <a class="btn btn-sm btn-primary" th:href="@{/invoices/petServices/update/{id}(id=*{id})}" title="Update/View"><i class="bi-pen"></i></a>
+                <a class="btn btn-sm btn-danger"  title="Delete" th:href="|javascript:openDeleteDialog('*{name}','/invoices/petServices', *{id});|"><i class="bi-trash"></i></a>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+</th:block>
+</body>
+</html>

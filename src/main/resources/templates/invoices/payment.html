@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html th:replace="~{layouts/mainLayout :: layout(~{:: #otherResources}, ~{:: #content})}" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <th:block id="otherResources">
+        <link rel="stylesheet" href="/css/stay.css">
+        <link rel="stylesheet" href="/css/stripePayment.css" />
+        <script src="https://unpkg.com/bootstrap-table@1.21.2/dist/bootstrap-table.min.js"></script>
+        <script src="/js/uiUtils.js"></script>
+        <script src="/js/invoices.js"></script>
+        <script src="https://js.stripe.com/v3/"></script>
+        <script src="https://polyfill.io/v3/polyfill.min.js?version=3.52.1&features=fetch"></script>
+        <script th:inline="javascript" defer>
+            const stripePublicKey = /*[[${stripePublishableKey}]]*/ null;
+            let paymentIntent = {
+                amount: /*[[${createPayment.amount}]]*/ null,
+                email: /*[[${createPayment.email}]]*/ null,
+                invoiceId: /*[[${createPayment.invoiceId}]]*/ null
+            };
+        </script>
+        <script th:src="@{/js/stripePayment.js}" defer></script>
+    </th:block>
+</head>
+<body>
+<div id="content" class="col-md-12 col-lg-10 col-xl-8 col-xxl-7">
+    <div class="d-flex align-items-center col-12 border-bottom pb-2 mb-3">
+        <a class="btn btn-secondary" th:href="@{/invoices/update/{id} (id=*{id})}" title="Go back invoice">
+            <i class="bi bi-box-arrow-in-left"></i>
+        </a>
+        <span th:text="${formTitle}" class="fw-semibold px-2">Pay invoice</span>
+    </div>
+    <div id="mainForm" class="row g-3 " th:Object="${invoice}" onsubmit="() => false">
+        <input type="hidden" id="id" th:field="*{id}">
+        <!--v Stay v-->
+        <th:block th:if="*{stay}">
+            <input type="hidden" id="stayId" th:field="*{stay}">
+            <div class="row bg-light shadow-sm mx-0 mt-1 py-1">
+                <label for="confirmationCode" class="col-sm-2 col-form-label text-no-wrap">Confirmation #</label>
+                <div class="col-sm-10">
+                    <a class="link-primary form-control-plaintext fw-bold text-lg" id="confirmationCode"
+                       th:text="*{stay.reservation.confirmation}"
+                       th:href="@{/stays/update/{id} (id=*{stay.id})}" tabindex="-1"></a>
+                </div>
+                <label for="stayService" class="col-sm-2 col-form-label">Service</label>
+                <div class="col-sm-10">
+                    <input type="text" class="form-control-plaintext" id="stayService" th:value="*{stay.reservation.service.name}" readonly tabindex="-1">
+                </div>
+                <label for="checkInDate" class="col-sm-2 col-form-label">Check-in</label>
+                <div class="col-sm-4">
+                    <input type="text" class="form-control-plaintext" id="checkInDate" th:value="*{#dates.format(stay.checkInTime, 'MM/dd/yyyy HH:mm:ss')}" readonly tabindex="-1">
+                </div>
+                <label for="checkOutDate" class="col-sm-2 col-form-label">Check-out</label>
+                <div class="col-sm-4">
+                    <input type="text" class="form-control-plaintext" id="checkOutDate" th:value="*{#dates.format(stay.checkOutTime, 'MM/dd/yyyy HH:mm:ss')}" readonly tabindex="-1">
+                </div>
+            </div>
+            <!--^ Stay ^-->
+            <hr class="my-1"/>
+        </th:block>
+        <div class="col-12 hstack">
+            <div class="col-sm-auto">
+                <label for="date" class="form-label">Date</label>
+                <input id="date" type="text" class="form-control-plaintext text-center" th:value="*{#dates.format(date, 'MM/dd/yyyy')}" readonly tabindex="-1">
+            </div>
+            <div class="col-sm-auto ms-auto">
+                <label for="number" class="form-label">Number</label>
+                <input id="number" type="text" class="form-control-plaintext bg-primary bg-opacity-10 text-center fw-semibold" th:value="*{getFullNumber()}" readonly tabindex="-1">
+            </div>
+        </div>
+        <div class="col-12">
+            <label for="billTo" class="form-label">Bill to</label>
+            <input type="text" id="billTo" class="form-control-plaintext" th:value="*{owner.getFullName()}"
+                   readOnly tabindex="-1">
+        </div>
+        <div class="col-12">
+            <label for="contact" class="form-label">Contact</label>
+            <div id="contact" class="bg-secondary bg-opacity-10 p-2 rounded"
+                 style="min-height: 4em;"
+                 th:utext="*{owner != null ? owner.getContactInformation()  : ''}">
+            </div>
+        </div>
+        <div class="col-12 d-grid">
+            <div class="accordion" id="detailsListAccordion">
+                <div class="accordion-item">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed p-2" type="button"
+                                data-bs-toggle="collapse"
+                                data-bs-target="#detailsList"
+                                aria-expanded="false"
+                                aria-controls="detailsList">
+                            Invoice Details
+                        </button>
+                    </h2>
+                    <div class="accordion-collapse collapse" id="detailsList"
+                         aria-labelledby="detailsList"
+                         data-bs-parent="#detailsListAccordion">
+                        <div class="accordion-body">
+                            <table
+                                    id="additionalServicesTable"
+                                    class="table striped-table">
+                                <thead>
+                                <tr>
+                                    <th class="text-center">Qty</th>
+                                    <th class="text-center">Service</th>
+                                    <th class="text-center">Unit price</th>
+                                    <th class="text-center">Description</th>
+                                    <th class="text-center">Subtotal</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <tr th:each="service, stat: *{details}">
+                                    <td class="text-center" data-field="_quantity" th:text="${service.quantity}"></td>
+                                    <td th:text="${service.service.name}"></td>
+                                    <td class="px-2 text-end" th:text="${service.pricePerUnit}"></td>
+                                    <td th:text="${service.description}"></td>
+                                    <td class="fw-semibold px-2 text-end" th:text="${#numbers.formatCurrency(service.getSubTotal())}"></td>
+
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 vstack text-end">
+            <div class="col-12 col-sm-8 col-lg-6 row ms-auto">
+                <label for="subTotal" class="col-form-label col-sm-4">SubTotal</label>
+                <div class="col-sm-8">
+                        <input type="text" id="subTotal" class="form-control text-end bg-light"
+                                th:value="*{#numbers.formatCurrency(getSubTotal())}" disabled tabindex="-1">
+                </div>
+                <label for="discountTotal" class="col-form-label col-sm-4">Discount</label>
+                <div class="col-sm-8 hstack">
+                    <div class="col-sm-5">
+                        <div class="input-group">
+                            <input type="number" id="discountPercent" class="form-control text-end px-1 bg-light"
+                                   th:field="*{discountPercent}" step="0.01" max="100" min="0" disabled>
+                            <span class="input-group-text">%</span>
+                        </div>
+                    </div>
+                    <input type="text" id="discountTotal" class="form-control text-end bg-light"
+                            th:value="*{#numbers.formatCurrency(getDiscountTotal())}" disabled>
+                </div>
+                <label for="taxTotal" class="col-form-label col-sm-4">Sale Taxes</label>
+                <div class="col-sm-8 hstack">
+                    <div class="col-sm-5">
+                        <div class="input-group">
+                             <input type="text" id="taxPercent" class="form-control text-end px-1 bg-light"
+                                   th:value="*{taxPercent}" step="0.01" max="100" min="0" disabled tabindex="-1">
+                            <span class="input-group-text">%</span>
+                        </div>
+                    </div>
+                    <input type="text" id="taxTotal" class="form-control text-end bg-light"
+                       th:value="*{#numbers.formatCurrency(getTaxTotal())}" disabled>
+                </div>
+                <label for="total" class="col-form-label col-sm-4 fw-semibold">Total</label>
+                <div class="col-sm-8">
+                    <input type="text" id="total" class="form-control text-end fw-semibold bg-light"
+                       th:value="*{#numbers.formatCurrency(getTotal())}" disabled tabindex="-1">
+                </div>
+            </div>
+        </div>
+        <div class="col-12 d-grid">
+            <div class="accordion" id="paymentMethodsAccordion">
+                <div class="accordion-item">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed p-2" type="button"
+                                data-bs-toggle="collapse"
+                                data-bs-target="#cashPaymentMethod"
+                                aria-expanded="false"
+                                aria-controls="cashPaymentMethod">
+                           <i class="bi bi-cash-coin fs-2 my-1 mx-2 text-primary"></i> Cash payment
+                        </button>
+                    </h2>
+                    <div class="accordion-collapse collapse" id="cashPaymentMethod"
+                         aria-labelledby="cashPaymentMethod"
+                         data-bs-parent="#paymentMethodsAccordion">
+                        <div class="accordion-body">
+                            <form id="cashPaymentForm" method="POST" class="row g-3 justify-content-center">
+                                <input type="hidden" th:field="${payment.invoice}">
+                                <input type="hidden" th:field="${payment.cashPayment}">
+                                <input type="hidden" th:field="${payment.cardConfirmation}">
+                                <div class="col-12 d-flex justify-content-center">
+                                    <div class="col-5">
+                                    <label for="cashAmount" class="form-label">Amount</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text">$</span>
+                                        <input type="number" id="cashAmount" class="form-control text-end px-2 bg-light" readonly
+                                               th:field="${payment.amount}" th:max="${#numbers.formatDecimal(invoice.getToPayTotal(), 1, 2)}" min="1" step="0.01" required>
+                                    </div>
+                                    </div>
+                                </div>
+                                <div class="col-5 hstack gap-2">
+                                    <a type="button" class="btn btn-secondary mx-1 col-auto" th:href="@{/invoices/update/{id} (id=*{id})}" title="Cancel and go back to invoice">
+                                        Cancel
+                                    </a>
+                                    <button type="submit" class="btn btn-primary mx-1 col" title="Make a payment">
+                                        <i class="bi bi-cash-coin"></i>
+                                        Make a payment
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                <div class="accordion-item">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed p-2" type="button"
+                                data-bs-toggle="collapse"
+                                data-bs-target="#stripePayment"
+                                aria-expanded="false"
+                                aria-controls="stripePayment">
+                           <i class="bi bi-stripe fs-2 my-1 mx-2 text-primary"></i> Card payment
+                        </button>
+                    </h2>
+                    <div class="accordion-collapse collapse " id="stripePayment"
+                         aria-labelledby="stripePayment"
+                         data-bs-parent="#paymentMethodsAccordion">
+                        <div class="accordion-body d-flex justify-content-center">
+                            <form id="payment-form">
+                                <div class="col-12 ">
+                                    <label for="amount" class="form-label mb-1">Amount</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text">$</span>
+                                        <input disabled type="number"  class="form-control text-end" id="amount" placeholder="0.00" th:value="${payment.amount}" required/>
+                                    </div>
+                                </div>
+                                <div class="col-12">
+                                    <label for="email" class="form-label mb-1">Email</label>
+                                    <input disabled type="email" class="form-control mb-2" id="email" placeholder="@" th:value="${invoice.owner.email}" required/>
+                                </div>
+                                <div id="payment-element">
+                                    <!--Stripe.js injects the Payment Element-->
+                                </div>
+                                <div class="col-12 hstack gap-2">
+                                    <a id="btnCancel" class="btn btn-secondary mx-1 col-auto" th:href="@{/invoices/update/{id} (id=*{id})}" title="Cancel and go back to invoice">
+                                        Cancel
+                                    </a>
+                                    <button id="btnSubmit" class="btn btn-primary mx-1 col" title="Make a payment">
+                                        <div class="spinner hidden" id="spinner"></div>
+                                        <span id="btnSubmitText">
+                                            <i class="bi bi-cash-coin"></i>
+                                            Make a payment
+                                        </span>
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+    <div id="errorStripePayment" class="toast fade position-absolute top-50 start-50 translate-middle border-danger fs-6"
+         role="alert" aria-live="assertive" aria-atomic="true" data-bs-autohide="false">
+        <div class="toast-header bg-danger bg-gradient">
+            <i class="bi bi-exclamation-circle text-white"></i>
+            <strong class="me-auto mx-2 text-white">Card payment error</strong>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+        <div class="toast-body" id="errorStripeMessage">
+            errorMessage
+        </div>
+    </div>
+</div>
+</body>
+</html>

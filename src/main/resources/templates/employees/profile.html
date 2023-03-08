@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html th:replace="~{layouts/mainLayout :: layout(~{:: #otherResources}, ~{:: #content})}" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <th:block id="otherResources">
+        <link rel="stylesheet" href="/css/employeeProfile.css">
+        <link rel="stylesheet" href="https://unpkg.com/bootstrap-table@1.21.2/dist/bootstrap-table.min.css">
+        <script th:src="@{/js/uiUtils.js}"></script>
+        <script src="https://unpkg.com/bootstrap-table@1.21.2/dist/bootstrap-table.min.js"></script>
+        <script src="//maxcdn.bootstrapcdn.com/bootstrap/4.1.1/js/bootstrap.min.js"></script>
+        <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    </th:block>
+</head>
+<body>
+<th:block id="content">
+    <div class="container emp-profile">
+        <form method="post" enctype="multipart/form-data" th:object="${employee}">
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="profile-img">
+                        <img th:if="*{photo}" th:src="*{getPhotoPath()}" alt="Employee Photo"/>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="profile-head">
+                        <h5 th:text="*{firstName} + ' ' + *{lastName}">Employee Name</h5>
+                        <h6 th:text="*{position}"></h6>
+                        <ul class="nav nav-tabs" id="myTab" role="tablist">
+                            <li class="nav-item">
+                                <a class="nav-link active" id="home-tab" data-toggle="tab" href="#home" role="tab" aria-controls="home" aria-selected="true">About</a>
+                            </li>
+                            <li class="nav-item">
+<!--                                TODO: add th:if for positions that will have appointments?-->
+                                <a class="nav-link" id="profile-tab" data-toggle="tab" href="#profile" role="tab" aria-controls="profile" aria-selected="false">Upcoming Appointments</a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <a class="btn profile-edit-btn" name="btnAddMore" value="Edit Profile" th:href="@{/myprofile/update/{id}(id=*{id})}">Edit Profile</a>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="profile-work">
+                        <p th:if="*{active}">Currently Employed</p>
+                        <p th:unless="*{active}">No longer employed</p>
+                    </div>
+                </div>
+                <div class="col-md-8">
+                    <div class="tab-content profile-tab" id="myTabContent">
+                        <div class="tab-pane fade show active" id="home" role="tabpanel" aria-labelledby="home-tab">
+                            <div th:if="*{user}" class="row">
+                                <div class="col-md-6">
+                                    <label>User ID</label>
+                                </div>
+                                <div class="col-md-6">
+                                    <p th:text="*{user.id}">User ID</p>
+                                </div>
+                            </div>
+                            <div th:if="*{user}" class="row">
+                                <div class="col-md-6">
+                                    <label>User Role</label>
+                                </div>
+                                <div class="col-md-6">
+                                    <p th:text="*{user.role.name}">User Role</p>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <label>Employee ID</label>
+                                </div>
+                                <div class="col-md-6">
+                                    <p th:text="*{id}">Employee ID</p>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <label>Email</label>
+                                </div>
+                                <div class="col-md-6">
+                                    <p th:text="*{email}">Email</p>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <label>Phone Number</label>
+                                </div>
+                                <div class="col-md-6">
+                                    <p th:text="*{phoneNumber}">Phone Number</p>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <label>Address</label>
+                                </div>
+                                <div class="col-md-6">
+                                    <p th:text="*{address}">Address</p>
+                                </div>
+                            </div>
+                            <div th:if="*{address2}" class="row">
+                                <div class="col-md-6">
+                                    <label>Address 2</label>
+                                </div>
+                                <div class="col-md-6">
+                                    <p th:text="*{address2}">Address 2</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="tab-pane fade" id="profile" role="tabpanel" aria-labelledby="profile-tab">
+                            <div class="row">
+                                <div class="col-md-6">
+<!--                                    TODO: Add upcoming appointments assigned to individual employees-->
+                                    <label>Upcoming Appointments</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</th:block>
+</body>
+</html>

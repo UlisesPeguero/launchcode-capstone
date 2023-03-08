@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html th:replace="~{layouts/mainLayout :: layout(~{:: #otherResources}, ~{:: #content})}" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <th:block id="otherResources">
+        <!-- comment from test -->
+    </th:block>
+
+<body>
+<th:block id="content">
+    <form th:action="@{/users/roles/saveRole}" th:object="${role}"
+          method="post" style="max-width: 600px; margin: 0 auto;">
+
+        <div class="m-3">
+            <td><input type="hidden" th:field="*{id}" readonly="readonly" /></td>
+            <div class="col-md-2">
+                <label for="name" class="form-label">Name</label>
+                <div class="input-group has-validation">
+                    <input th:field="*{name}" class="form-control" th:errorclass="is-invalid" id="name" required>
+                    <div id="validationServerNameFeedback" class="invalid-feedback" th:errors="*{name}"> </div>
+                </div>
+            </div>
+            <div>
+                <button type="submit" class="btn btn-primary">Create</button>
+                <button type="button" class="btn btn-secondary" onclick="location.href='/users/roles/roleList'">Cancel</button>
+            </div>
+        </div>
+    </form>
+</th:block>
+</body>
+</html>

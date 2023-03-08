@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html th:replace="~{layouts/mainLayout :: layout(~{:: #otherResources}, ~{:: #content})}" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <th:block id="otherResources">
+        <script th:src="@{/js/uiUtils.js}"></script>
+    </th:block>
+</head>
+<body>
+    <th:block id="content" >
+        <div id="toolbar calendar" class="d-flex">
+            <a class="btn btn-primary" th:href="@{/reservations/create?checkInOnSave=true}" title="Register a new stay">
+                <i class="bi bi-plus-lg"></i>
+                <span class="d-none d-sm-inline">Add Stay</span>
+            </a>
+            <div class="vr mx-2"></div>
+            <div class="btn-group" role="group" aria-label="Change view">
+                <input type="radio" id="btnCalendar" class="btn-check" autocomplete="off">
+                <label for="btnCalendar" class="btn btn-outline-primary disabled" ><i class="bi-calendar-week"></i></label>
+                <input type="radio" id="btnGrid" class="btn-check" autocomplete="off" onclick="location.href='/stays/grid'">
+                <label for="btnGrid" class="btn btn-primary"><i class="bi-table" title="Change to table view" ></i></label>
+            </div>
+        </div>
+        <div id="staysCalendar"></div>
+    </th:block>
+</body>
+</html>

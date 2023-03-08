@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html th:replace="~{layouts/mainLayout :: layout(~{:: #otherResources}, ~{:: #content})}" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <th:block id="otherResources">
+        <!-- comment from test -->
+    </th:block>
+</head>
+<body>
+<th:block id="content">
+<!--    -->
+<form th:action="@{/users/saveUser}" th:object="${user}"
+      method="post" style="max-width: 600px; margin: 0 auto;">
+    <input type="hidden" th:field="${user}"/>
+    <div class="m-3">
+        <input type="hidden" th:field="*{id}">
+        <div class="form-group">
+            <label th:for="username">Username
+                <input id="username" class="form-control" th:field="*{username}"/>
+            </label>
+        </div>
+        <div class="form-group">
+            <div class="col-8">
+                <label for="role" class="form-label">Role</label>
+                <select id="role" th:field="*{role}" class="form-select" th:errorclass="is-invalid">
+                    <option selected hidden value="">Select a Role</option>
+                    <option th:each="role: ${listRoles}"
+                            th:text="${role.name}"
+                            th:value="${role.id}">
+                    </option>
+                </select>
+                <div id="validationServerRoleFeedback" class="invalid-feedback" th:errors="*{role}"></div>
+            </div>
+        </div>
+        <div class="form-group">
+            <th:block th:unless="*{active}">
+                <input type="checkbox" name="inactive" id="inactive" th:field="*{active}" value="true">
+                <label for="inactive">Re-activate account?</label>
+            </th:block>
+        </div>
+            <div>
+            <button type="submit" class="btn btn-primary">Update</button>
+            <button type="button" class="btn btn-secondary" onclick="location.href='/users'">Cancel</button>
+        </div>
+    </div>
+</form>
+</th:block>
+</body>
+</html>

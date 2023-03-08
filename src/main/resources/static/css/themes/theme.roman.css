@@ -1,0 +1,47 @@
+/* remove if wont use font*/
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300&display=swap');
+
+/* do not use variables in this style*/
+div.roman {
+  background-color:  orange; /* same color as --base-color */
+}
+
+body.roman {
+  --base-color: orange;
+  --lb-btn-border-color: #382a75;
+  --lb-btn-active-bg: #312e69;
+  --lb-btn-active-border-color: #251958;
+  --bs-blue: var(--base-color);
+  --bs-body-font-family: 'Roboto', sans-serif; /* remove if wont use font*/
+}
+
+
+body.roman * .btn-primary {
+  --bs-btn-color: #fff;
+  --bs-btn-bg: var(--base-color) !important;  
+  --bs-btn-border-color: var(--lb-btn-border-bg) !important;
+  --bs-btn-hover-color: #fff;
+  --bs-btn-hover-bg: var(--base-color) !important;  
+  --bs-btn-hover-border-color: var(--lb-btn-active-bg) !important;
+  --bs-btn-focus-shadow-rgb: 49,132,253;
+  --bs-btn-active-color: #fff;
+  --bs-btn-active-bg: var(--lb-btn-active-bg) !important;
+  --bs-btn-active-border-color: var(--lb-btn-active-border-color) !important;
+  --bs-btn-active-shadow: inset 0 3px 5px rgba(0, 0, 0, 0.125);
+  --bs-btn-disabled-color: #fff;
+  --bs-btn-disabled-bg: var(--base-color) !important;  
+  --bs-btn-disabled-border-color: var(--lb-btn-border-color) !important;  
+}
+
+body.roman * .pagination {
+  --bs-pagination-active-bg: var(--base-color) !important; 
+  --bs-pagination-active-border-color: var(--lb-btn-border-color) !important; 
+}
+
+body.roman * .link-primary {
+  color: var(--base-color) !important;
+}
+
+body.roman * .selectedTheme {
+  background-color:var(--base-color);
+}

@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html th:replace="~{layouts/mainLayout :: layout(~{:: #otherResources}, ~{:: #content})}" xmlns:th="http://www.thymeleaf.org">
+<head>
+   <meta charset="UTF-8">
+   <title>Title</title>
+   <th:block id="otherResources">
+      <link rel="stylesheet" href="https://unpkg.com/bootstrap-table@1.21.2/dist/bootstrap-table.min.css">
+      <script src="https://unpkg.com/bootstrap-table@1.21.2/dist/bootstrap-table.min.js"></script>
+   </th:block>
+
+</head>
+<body>
+<th:block id="content">
+
+   <table class="table table-striped">
+      <tr>
+         <th>Confirmation Code</th>
+         <td th:text="${reservation.confirmation}"></td>
+      </tr>
+      <tr>
+         <th>Owner</th>
+         <td th:text="${reservation.getPet().getOwner().getFullName()}"></td>
+      </tr>
+      <tr>
+         <th>Contact</th>
+         <td th:text="${reservation.getPet().getOwner().getEmail()}"></td>
+      </tr>
+      <tr>
+         <th>Pet</th>
+         <td th:text="${reservation.getPet().petName}"></td>
+      </tr>
+      <tr>
+         <th>Start Date</th>
+         <td th:text="${reservation.startDateTime}"></td>
+      </tr>
+      <tr>
+         <th>End Date</th>
+         <td th:text="${reservation.endDateTime}"></td>
+      </tr>
+      <tr>
+         <th>Comments</th>
+         <td th:text="${reservation.comments}"></td>
+      </tr>
+   </table>
+   <div class="form-group">
+      <a type="button" class="btn btn-secondary" href="/reservations/grid" title="Cancel reservation">
+         Cancel
+      </a>
+      <a class="btn btn-primary" title="update" th:href="@{'/reservations/update?reservationId=' + ${reservation.id}}"><i class="bi bi-pen"></i></a>
+      <a class="btn btn-danger" title="delete" th:href="@{'/reservations/delete?reservationId=' + ${reservation.id}}"><i class="bi bi-trash"></i></a>
+      <a class="btn btn-primary" th:href="@{/reservations/resendEmail?reservationId={id}(id=${reservation.id})}">Resend email</a>
+   </div>
+</th:block>
+</body>
+</html>

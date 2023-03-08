@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html th:replace="~{layouts/mainLayout :: layout(~{:: #otherResources}, ~{:: #content})}" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <th:block id="otherResources">
+    </th:block>
+</head>
+<body>
+<th:block id="content">
+
+    <h1 th:text="${owner.firstName + ' ' + owner.lastName}">Default Title</h1>
+
+    <div class="form-group" th:object="${owner}" >
+        <label th:for="firstName">First Name</label>
+        <input class="form-control" th:field="*{firstName}" value="${owner.firstName}"/>
+        <span th:errors="${owner.firstName}" class="error"></span>
+
+        <label th:for="lastName">Last Name</label>
+        <input class="form-control" th:field="*{lastName}" value="${owner.lastName}"/>
+        <span th:errors="${owner.lastName}" class="error"></span>
+
+        <label th:for="address">Address</label>
+        <input class="form-control" th:field="*{address}" value="${owner.address}"/>
+        <span th:errors="${owner.address}" class="error"></span>
+
+        <label th:for="address2">Address 2</label>
+        <input class="form-control" th:field="*{address2}" value="${owner.address2}"/>
+        <span th:errors="${owner.address2}" class="error"></span>
+
+        <label th:for="phoneNumber">Phone Number</label>
+        <input class="form-control" th:field="*{phoneNumber}" value="${owner.phoneNumber}"/>
+        <span th:errors="${owner.firstName}" class="error"></span>
+
+        <label th:for="email">Email</label>
+        <input class="form-control" th:field="*{email}" value="${owner.email}"/>
+        <span th:errors="${owner.email}" class="error"></span>
+
+        <label th:for="notes">Notes</label>
+        <input class="form-control" th:field="*{notes}" value="${owner.notes}"/>
+        <span th:errors="${owner.notes}" class="error"></span>
+    </div>
+
+    <a th:href="@{/owners}">Return</a>
+</th:block>
+</body>
+</html>

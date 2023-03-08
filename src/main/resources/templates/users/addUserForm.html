@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html th:replace="~{layouts/mainLayout :: layout(~{:: #otherResources}, ~{:: #content})}" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <th:block id="otherResources">
+        <script src="https://cdn.jsdelivr.net/npm/datalist-css/dist/datalist-css.min.js"></script>
+        <link rel="stylesheet" type="text/css" th:href="@{/css/styles.css}"/>
+        <!-- comment from test -->
+    </th:block>
+</head>
+<body>
+<th:block id="content">
+<div class="container body-content">
+    <form th:action="@{/users/addUserForm}" th:object="${addNewUserDTO}" method="post">
+        <div class="col-md-2">
+            <label for="username" class="form-label">Username</label>
+            <div class="input-group has-validation">
+                <input th:field="*{username}" class="form-control" th:errorclass="is-invalid" id="username" required>
+                <div id="validationServerUsernameFeedback" class="invalid-feedback" th:errors="*{username}"> </div>
+            </div>
+            <label for="password" class="form-label">Password</label>
+            <div class="input-group has-validation">
+                <input th:field="*{password}" class="form-control" th:errorclass="is-invalid" id="password" type="password" required>
+                <div id="validationServerPasswordFeedback" class="invalid-feedback" th:errors="*{password}"> </div>
+            </div>
+            <label for="verifyPassword" class="form-label">Verify Password</label>
+            <div class="input-group has-validation">
+                <input th:field="*{verifyPassword}" class="form-control" id="verifyPassword" type="password">
+            </div>
+            <label for="role" class="form-label">Role</label>
+                <select id="role" th:field="*{role}" class="form-select" th:errorclass="is-invalid">
+                    <option selected hidden value="">Select a Role</option>
+                    <option th:each="role: ${listRoles}"
+                            th:text="${role.name}"
+                            th:value="${role.id}">
+                    </option>
+                </select>
+                <div id="validationServerRoleFeedback" class="invalid-feedback" th:errors="*{role}"></div>
+            <label for="employee" class="form-label">Employee</label>
+                 <select id="employee" th:field="*{employee}" class="form-select" th:errorclass="is-invalid">
+                    <option selected hidden value="">Select an Employee</option>
+                    <option th:each="employee: ${listEmployees}"
+                            th:value="${employee.id}"
+                            th:text="${employee.getFullName()}">
+                    </option>
+                </select>
+                <div id="validationServerEmployeeFeedback" class="invalid-feedback" th:errors="*{employee}"></div>
+        </div>
+        <input type="submit" class="btn btn-primary" value="Add User"/>
+        <button type="button" class="btn btn-secondary" onclick="location.href='/users'">Cancel</button>
+    </form>
+</div>
+</th:block>
+</body>
+</html>

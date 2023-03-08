@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html th:replace="~{layouts/mainLayout :: layout(~{:: #otherResources}, ~{:: #content})}" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <th:block id="otherResources">
+        <!-- comment from test -->
+        <link rel="stylesheet" href="/css/kennel.css">
+        <script src="/js/kennels.js"></script>
+    </th:block>
+</head>
+<body>
+<th:block id="content">
+
+    <div>
+        <a class="btn btn-primary" th:href="@{/kennels/grid}" title="Calendar view">
+            <span class="d-none d-sm-inline">Grid view</span>
+        </a>
+    </div>
+
+    <div th:each="kennel:${kennels}" class="modal" th:id="myModal + ${kennel.id}">
+        <div class="modal-dialog">
+            <!-- Modal content-->
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h1 th:text="'K' + ${kennel.id} + ' &quot;' + ${kennel.name} + '&quot;'"></h1>
+                </div>
+                <div class="modal-body">    <!-- If there is a stay with that kennel on the current date --->
+                    <h2 th:each="stay:${stays}" th:if="${stay.kennel.id == kennel.id} and ${stay.reservation.startDateTime.before(TODAY)} and ${stay.reservation.endDateTime.after(TODAY)}" th:text="'Pet: ' + ${stay.reservation.pet.petName}"></h2>
+                    <p th:each="stay:${stays}" th:if="${stay.kennel.id == kennel.id} and ${stay.reservation.startDateTime.before(TODAY)} and ${stay.reservation.endDateTime.after(TODAY)}" th:text="'Start Date: ' + ${stay.reservation.startDateTime}"></p>
+                    <p th:each="stay:${stays}" th:if="${stay.kennel.id == kennel.id} and ${stay.reservation.startDateTime.before(TODAY)} and ${stay.reservation.endDateTime.after(TODAY)}" th:text="'End Date: ' + ${stay.reservation.endDateTime}"></p>
+                    <button th:id="close + ${kennel.id}" type="button" class="close" data-dismiss="modal" onclick="closeModal(this.id)">&times;</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <svg width="1110" height="706.5" version="1.1" viewBox="0 0 740 471" xmlns="http://www.w3.org/2000/svg" >   <!--- Sets size for this Scalable Vector Graphic --->
+        <!--- make a container for the image --->
+        <g id="a" transform="translate(370,235.5)">
+            <image x="-370" y="-235.5" width="740" height="471" fill="#000000" vector-effect="non-scaling-stroke" xlink:href="/img/kennelMap.svg"/>
+        </g>
+
+        <!--- container for a kennel, basically a rectangle. Coordinates scale with image --->
+        <g th:each="kennel: ${kennels}" th:object="${kennel}" class="icon" fill-opacity="0">
+            <rect th:id="${kennel.id}" th:x="${kennel.getXPos()}" th:y="${kennel.yPos}" th:width="${kennel.width}" th:height="${kennel.height}" onclick="modalClick(this.id)"/>
+        </g>
+    </svg>
+
+</th:block>
+</body>
+</html>

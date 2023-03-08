@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html th:replace="~{layouts/mainLayout :: layout(~{:: #otherResources}, ~{:: #content})}" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <th:block id="otherResources">
+        <link rel="stylesheet" href="https://unpkg.com/bootstrap-table@1.21.2/dist/bootstrap-table.min.css">
+        <script src="https://unpkg.com/bootstrap-table@1.21.2/dist/bootstrap-table.min.js"></script>
+        <script src="/js/uiUtils.js"></script>
+    </th:block>
+</head>
+<body>
+<div id="content" class="col-md-12 col-lg-10 col-xl-8  col-xxl-6">
+    <div class="d-flex align-items-center col-12 border-bottom pb-2 mb-3">
+        <a class="btn btn-secondary" href="/employees" title="Go back to Employees table">
+            <i class="bi bi-box-arrow-in-left"></i>
+        </a>
+        <span th:text="${formTitle}" class="fw-semibold px-2">New/Update Employee</span>
+        <div th:if="${employee.id}" class="form-toolbar d-flex ms-auto">
+            <a class="btn btn-danger" title="Delete this employee" th:href="|javascript:openDeleteDialog('${employee.getFullName()}','/employees', ${employee.id});|">
+                <i class="bi-trash"></i>
+                <span class="d-none d-sm-inline">Delete</span>
+            </a>
+            <div class="vr mx-2"></div>
+            <a class="btn btn-primary ms-auto" title="Open job positions table" href="/employees/positions">
+                <i class="bi bi-table"></i>
+                <span class="d-none d-sm-inline">Job Positions</span>
+            </a>
+        </div>
+    </div>
+    <form id="mainForm" class="row g-3" th:Object="${employee}" th:method="${submitMethod}" th:action="@{${submitURL}}" enctype="multipart/form-data">
+        <input type="hidden" id="id" th:field="*{id}">
+        <div class="col-md-6">
+            <div class="col-12 mb-3">
+                <label for="photo" class="form-label">Photo</label>
+                <input type="file" name="image" value="image" class="form-control" id="photo" onchange="displayPhotoPreview(event.target, 'photoPreview')" accept="image/png, image/jpeg">
+            </div>
+            <div th:if="${session.user} ? ${session.user.isAdmin()} : true" class="col-12">
+                <label for="position" class="form-label">Position</label>
+                <div class="input-group has-validation">
+                    <select id="position" th:field="*{position}" class="form-select" th:errorclass="is-invalid" required>
+                        <option selected value="">Select one...</option>
+                        <option th:each="position: ${positions}"
+                                th:value="${position.id}"
+                                th:text="${position.name}">
+                        </option>
+                    </select>
+                    <a class="btn btn-primary" th:href="@{/employees/positions/add}" title="Add a new job position">
+                        <i class="bi bi-plus"></i>
+                    </a>
+                    <div id="validationServerPositionFeedback" class="invalid-feedback" th:errors="*{position}"></div>
+                </div>
+            </div>
+            <div th:unless="${session.user} ? ${session.user.isAdmin()} : true" class="col-12">
+                    <select hidden th:field="*{position}" class="form-select" required>
+                        <option selected value="">Select one...</option>
+                        <option th:each="position: ${positions}"
+                                th:value="${position.id}"
+                                th:text="${position.name}">
+                        </option>
+                    </select>
+            </div>
+        </div>
+        <div class="col-md-6 d-flex justify-content-center align-content-center">
+            <input type="hidden" th:field="*{photo}">
+            <img th:unless="*{photo}" id="photoPreview" alt="Photo preview"  class="preview-photo img-thumbnail" th:style="*{photo} ? '' : 'display: none;'">
+            <img th:if="*{photo}" th:src="*{getPhotoPath()}" id="existingPhoto" alt="Photo preview"  class="preview-photo img-thumbnail" th:style="*{photo} ? '' : 'display: none;'">
+        </div>
+        <div class="col-md-6">
+            <label for="firstName" class="form-label">First Name</label>
+            <div class="input-group has-validation">
+                <input th:field="*{firstName}" class="form-control" th:errorclass="is-invalid" id="firstName" required>
+                <div id="validationServerFirstNameFeedback" class="invalid-feedback" th:errors="*{firstName}"> </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <label for="lastName" class="form-label">Last Name</label>
+            <div class="input-group has-validation">
+                <input th:field="*{lastName}" class="form-control" th:errorclass="is-invalid" id="lastName" required>
+                <div id="validationServerLastNameFeedback" class="invalid-feedback" th:errors="*{lastName}"> </div>
+            </div>
+        </div>
+        <div class="col-12">
+            <label for="address" class="form-label">Address</label>
+            <div class="input-group has-validation">
+                <input type="text" th:field="*{address}" class="form-control" th:errorclass="is-invalid" id="address" placeholder="1234 Main St" required>
+                <div id="validationServerAddressFeedback" class="invalid-feedback" th:errors="*{address}"></div>
+            </div>
+        </div>
+        <div class="col-12">
+            <label for="address2" class="form-label">Address 2</label>
+            <input type="text" th:field="*{address2}" class="form-control" id="address2" placeholder="Apartment, studio, or floor">
+        </div>
+        <div class="col-8">
+            <label for="email" class="form-label">Email</label>
+            <div class="input-group has-validation">
+                <input type="email" th:field="*{email}"  class="form-control" th:errorclass="is-invalid" id="email" placeholder="@" required>
+                <div id="validationServerEmailFeedback" class="invalid-feedback" th:errors="*{email}"></div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <label for="phoneNumber" class="form-label">Phone Number</label>
+            <div class="input-group has-validation">
+                <input type="text" th:field="*{phoneNumber}" class="form-control" th:errorclass="is-invalid" id="phoneNumber">
+                <div id="validationPhoneNumberFeedback" class="invalid-feedback" th:errors="*{phoneNumber}"></div>
+            </div>
+        </div>
+        <div class="col" th:if="*{id} and ${session.user.isAdmin()}">
+            <div class="form-check form-switch">
+                <input class="form-check-input" type="checkbox" role="switch" id="active" th:field="*{active}">
+                <label class="form-check-label" for="active">Active</label>
+            </div>
+        </div>
+        <div class="col-12 d-flex p-2">
+            <button class="me-auto btn btn-secondary o-1" title="Clear form" type="reset">
+                <i class="bi bi-eraser"></i>
+            </button>
+            <a type="button" class="btn btn-secondary mx-1" href="/employees" title="Cancel register and go back">
+                Cancel
+            </a>
+            <button type="submit" class="btn btn-primary mx-1" title="Save changes">
+                <i class="bi bi-save"></i>
+                Save
+            </button>
+        </div>
+    </form>
+
+
+</div>
+</body>
+</html>

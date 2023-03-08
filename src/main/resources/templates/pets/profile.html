@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html th:replace="~{layouts/mainLayout :: layout(~{:: #otherResources}, ~{:: #content})}" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <th:block id="otherResources">
+        <link rel="stylesheet" href="/css/employeeProfile.css">
+        <link rel="stylesheet" href="https://unpkg.com/bootstrap-table@1.21.2/dist/bootstrap-table.min.css">
+        <script th:src="@{/js/uiUtils.js}"></script>
+        <script src="https://unpkg.com/bootstrap-table@1.21.2/dist/bootstrap-table.min.js"></script>
+        <script src="//maxcdn.bootstrapcdn.com/bootstrap/4.1.1/js/bootstrap.min.js"></script>
+        <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    </th:block>
+</head>
+<body>
+<th:block id="content">
+    <div class="container emp-profile">
+        <form method="post" enctype="multipart/form-data" th:object="${pet}">
+            <div class="row">
+                <div class="col-md-4">
+                    <div th:if="*{photo}" class="profile-img">
+                        <img th:src="*{getPhotoPath()}" alt="Pet Photo"/>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="profile-head">
+                        <h5 th:text="*{petName}">Pet Name</h5>
+                        <h6 th:text="*{breed}"></h6>
+                        <ul class="nav nav-tabs" id="myTab" role="tablist">
+                            <li class="nav-item">
+                                <a class="nav-link active" id="home-tab" data-toggle="tab" href="#home" role="tab" aria-controls="home" aria-selected="true">About</a>
+                            </li>
+                            <li class="nav-item">
+                                <!--                                TODO: add th:if for positions that will have appointments?-->
+                                <a class="nav-link" id="profile-tab" data-toggle="tab" href="#profile" role="tab" aria-controls="profile" aria-selected="false">Upcoming Appointments</a>
+                            </li>
+<!--                            TODO: add past appointments and notes tab-->
+                        </ul>
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <a class="btn profile-edit-btn" name="btnAddMore" value="Edit Profile" th:href="@{/showFormForUpdate/{id}(id=*{id})}">Edit Profile</a>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="profile-work">
+                        <p>Notes:</p>
+                        <p th:text="*{notes}">notes</p><br/>
+                    </div>
+                </div>
+                <div class="col-md-8">
+                    <div class="tab-content profile-tab" id="myTabContent">
+                        <div class="tab-pane fade show active" id="home" role="tabpanel" aria-labelledby="home-tab">
+<!--                            <div th:if="*{owner}" class="row">-->
+<!--                                <div class="col-md-6">-->
+<!--                                    <label>Owner ID</label>-->
+<!--                                </div>-->
+<!--                                <div class="col-md-6">-->
+<!--                                    <p th:text="*{owner.id}">Owner ID</p>-->
+<!--                                </div>-->
+<!--                            </div>-->
+<!--                            <div th:if="*{owner}" class="row">-->
+<!--                                <div class="col-md-6">-->
+<!--                                    <label>Owner Name</label>-->
+<!--                                </div>-->
+<!--                                <div class="col-md-6">-->
+<!--                                    <p th:text="*{owner.name}">User Role</p>-->
+<!--                                </div>-->
+<!--                            </div>-->
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <label>Pet ID</label>
+                                </div>
+                                <div class="col-md-6">
+                                    <p th:text="*{id}">Pet ID</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="tab-pane fade" id="profile" role="tabpanel" aria-labelledby="profile-tab">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <!--                                    TODO: Add upcoming appointments assigned to individual pets-->
+                                    <label>Upcoming Appointments</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</th:block>
+</body>
+</html>

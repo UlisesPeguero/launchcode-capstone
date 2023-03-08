@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html th:replace="~{layouts/mainLayout :: layout(~{:: #otherResources}, ~{:: #content})}" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <th:block id="otherResources">
+        <link rel="stylesheet" href="https://unpkg.com/bootstrap-table@1.21.2/dist/bootstrap-table.min.css">
+        <link rel="stylesheet" href="/css/stay.css">
+        <script src="https://unpkg.com/bootstrap-table@1.21.2/dist/bootstrap-table.min.js"></script>
+        <script src="/js/uiUtils.js"></script>
+        <script src="/js/stay.js"></script>
+        <script th:inline="javascript">
+            additionalServices = [[${mapStaysAdditionalServices}]];
+            currentIndex = Object.keys(additionalServices).length;
+        </script>
+    </th:block>
+</head>
+<body>
+<div id="content" class="col-md-12 col-lg-10 col-xl-8 col-xxl-6">
+    <div class="d-flex align-items-center col-12 border-bottom pb-2 mb-3">
+        <a class="btn btn-secondary" href="/stays" title="Go back to Stays">
+            <i class="bi bi-box-arrow-in-left"></i>
+        </a>
+        <span th:text="${formTitle}" class="fw-semibold px-2">New/Update Stay</span>
+        <div th:if="${stay.id}" class="form-toolbar d-flex ms-auto">
+            <button class="btn btn-primary ms-auto" th:classappend="${stay.invoice} ? 'disabled' : null" title="Start check-out" th:onclick="|openConfirmationDialog('Do you wish to start the check-out process?', '/stays/checkout/${stay.id}')|">
+                <i class="bi bi-receipt"></i>
+                <span class="d-none d-sm-inline">Check-Out</span>
+            </button>
+            <div class="vr mx-2"></div>
+            <a class="btn btn-danger" title="Delete this stay" th:href="|javascript:openDeleteDialog('${stay.reservation.confirmation}','/stays', ${stay.id});|">
+                <i class="bi-trash"></i>
+                <span class="d-none d-sm-inline">Delete</span>
+            </a>
+        </div>
+    </div>
+    <form id="mainForm" class="row g-3 " th:Object="${stay}" method="POST" th:action="@{${submitURL}}">
+        <input type="hidden" id="id" th:field="*{id}">
+        <!--v Reservation v-->
+        <input type="hidden" id="reservationId" th:field="*{reservation}">
+        <div class="row bg-light shadow-sm mx-0 mt-1 py-1">
+            <label for="confirmationCode" class="col-sm-2 col-form-label">Confirmation #</label>
+            <div class="col-sm-10">
+                <a class="link-primary form-control-plaintext fw-bold text-lg" id="confirmationCode"
+                   th:text="*{reservation.confirmation}"
+                   th:href="@{/reservations/update?reservationId={id} (id=*{reservation.id})}" tabindex="-1"></a>
+            </div>
+            <label for="petOwner" class="col-sm-2 col-form-label">Parent</label>
+            <div class="col-sm-4">
+                <input type="text" class="form-control-plaintext" id="petOwner" th:value="*{reservation.pet.owner.getFullName()}" readonly tabindex="-1">
+            </div>
+            <label for="pet" class="col-sm-2 col-form-label">Pet</label>
+            <div class="col-sm-4">
+                <input type="text" class="form-control-plaintext" id="pet" th:value="*{reservation.pet.petName}" readonly tabindex="-1">
+            </div>
+            <label for="startDate" class="col-sm-2 col-form-label">From</label>
+            <div class="col-sm-4">
+                <input type="date" class="form-control-plaintext" id="startDate" data-date-format="mm/dd/yyyy" th:value="*{#dates.format(reservation.startDateTime, 'yyyy-MM-dd')}" readonly tabindex="-1">
+            </div>
+            <label for="endDate" class="col-sm-2 col-form-label">To</label>
+            <div class="col-sm-4">
+                <div class="col-sm-10">
+                    <div class="input-group">
+                        <input type="date" class="form-control" id="endDate" name="endDateValue" data-date-format="mm/dd/yyyy" th:field="*{reservation.endDateTime}"
+                        disabled>
+                        <button id="btnEnableEndDate" type="button" class="btn btn-outline-primary" onclick="toggleEndDate()" >
+                            <i class="bi-pen"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <label for="reservationComments" class="col-sm-2 col-form-label">Comments</label>
+            <div class="col-sm-10">
+                <textarea class="form-control-plaintext" id="reservationComments" th:text="*{reservation.comments}" rows="2" readonly tabindex="-1"></textarea>
+            </div>
+        </div>
+        <!--^ Reservation ^-->
+        <hr class="my-1"/>
+        <div class="col-12 hstack">
+            <div class="col-sm-auto">
+                <label for="checkInDate" class="form-label">Check-In Time</label>
+                <input id="checkInDate" type="text" class="form-control bg-success bg-opacity-10 text-center fw-semibold" th:value="*{#dates.format(checkInTime, 'MM/dd/yyyy HH:mm:ss')}" readonly tabindex="-1">
+            </div>
+            <div class="col-sm-auto ms-auto">
+                <label for="checkOutDate" class="form-label">Check-Out Time</label>
+                <input id="checkOutDate" type="text" class="form-control bg-danger bg-opacity-10 text-center fw-semibold" th:value="*{#dates.format(checkOutTime, 'MM/dd/yyyy HH:mm:ss')}" readonly tabindex="-1">
+            </div>
+        </div>
+        <div class="col-12">
+            <label for="service" class="form-label">Service</label>
+            <div class="input-group has-validation">
+                <select id="service" class="form-select" th:field="*{reservation.service}" tabindex="1" autofocus>
+                    <option selected value="">Select a service...</option>
+                    <option th:each="service: ${services}"
+                            th:value="${service.id}"
+                            th:text="${service.name}">
+                    </option>
+                </select>
+                <div id="validationServerServiceFeedback" class="invalid-feedback" th:errors="*{reservation.service}"></div>
+            </div>
+        </div>
+        <div class="col-sm-3">
+            <label for="kennel" class="form-label">Kennel</label>
+            <div class="input-group has-validation">
+                <select id="kennel"  class="form-select" th:field="*{kennel}">
+                    <option selected value="">Select a kennel...</option>
+                    <option th:each="kennel: ${kennels}"
+                            th:value="${kennel.id}"
+                            th:text="${kennel.name}">
+                    </option>
+                </select>
+                <div id="validationServerKennelFeedback" class="invalid-feedback"></div>
+            </div>
+        </div>
+        <div class="col-9">
+            <label for="employee" class="form-label">Caretaker</label>
+            <div class="input-group has-validation">
+                <select id="employee" th:field="*{employee}" class="form-select" th:errorclass="is-invalid" required>
+                    <option selected value="">Select a caretaker...</option>
+                    <option th:each="caretaker: ${caretakers}"
+                            th:value="${caretaker.id}"
+                            th:text="${caretaker.getFullName()}">
+                    </option>
+                </select>
+                <div id="validationServerEmployeeFeedback" class="invalid-feedback" th:errors="*{employee}"></div>
+            </div>
+        </div>
+        <div class="col-12 d-grid">
+            <button id="btnAddService" class="btn btn-outline-primary" type="button"
+                    onclick="addAdditionalService()">
+                <span >Add Additional Service</span>
+                <i class="bi-plus-lg"></i>
+            </button>
+            <div id="additionalServicesContainer" th:class="*{additionalServices.size() == 0} ? collapse : null">
+                <table
+                    id="additionalServicesTable"
+                    data-toggle="table">
+                    <thead>
+                    <tr>
+                        <th data-halign="center">Qty</th>
+                        <th data-halign="center">Service</th>
+                        <th data-halign="center">Unit price</th>
+                        <th data-halign="center">Description</th>
+                        <th data-halign="center">Subtotal</th>
+                        <th></th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="service, stat: *{additionalServices}">
+                        <td class="text-center" data-field="_quantity" th:text="${service.quantity}"></td>
+                        <td data-field="_serviceText" th:text="${service.service.name}"></td>
+                        <td data-field="_pricePerUnit" class="px-2 text-end" th:text="${service.pricePerUnit}"></td>
+                        <td data-field="_description" th:text="${service.description}"></td>
+                        <td data-field="_subTotal" class="fw-semibold px-2 text-end" th:text="${#numbers.formatCurrency(service.getSubTotal())}"></td>
+                        <td class="text-center">
+                            <button type="button" class="btn btn-sm btn-outline-primary" title="Update/View" th:onclick="|openAdditionalServicesDialog(${service.id}, ${stat.index})|"><i class="bi-pen"></i></button>
+                            <button type="button" class="btn btn-sm btn-outline-danger"  title="Remove" th:onclick="|openConfirmRemoveDialog(${service.id}, ${stat.index})|"><i class="bi-dash-lg"></i></button>
+                            <input data-field="_id" type="hidden" th:field="*{additionalServices[__${stat.index}__].id}">
+                            <input data-field="_serviceId" type="hidden" th:field="*{additionalServices[__${stat.index}__].service}">
+                            <input data-field="_quantity" type="hidden" th:field="*{additionalServices[__${stat.index}__].quantity}">
+                            <input data-field="_pricePerUnit" type="hidden" th:field="*{additionalServices[__${stat.index}__].pricePerUnit}">
+                            <input data-field="_description" type="hidden" th:field="*{additionalServices[__${stat.index}__].description}">
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div class="col-3">
+            <label for="status" class="form-label">Status</label>
+            <div class="input-group has-validation">
+                <select id="status" th:field="*{status}" class="form-select" th:errorclass="is-invalid" required>
+                    <option th:each="status: ${statuses}"
+                            th:value="${status.id}"
+                            th:text="${status.name}">
+                    </option>
+                </select>
+                <div id="validationServerStatusFeedback" class="invalid-feedback" th:errors="*{status}"></div>
+            </div>
+        </div>
+        <div class="col-12" th:if="*{id}">
+            <div class="form-check form-switch">
+                <input class="form-check-input" type="checkbox" role="switch" id="active" th:field="*{active}">
+                <label class="form-check-label" for="active">Active</label>
+            </div>
+        </div>
+        <div class="col-12 hstack gap-2">
+            <button class="me-auto btn btn-secondary o-1" title="Clear form" type="reset" th:if="*{id == null}">
+                <i class="bi bi-eraser"></i>
+            </button>
+            <a type="button" class="btn btn-secondary mx-1 ms-auto" href="/stays/grid" title="Cancel register and go back">
+                Cancel
+            </a>
+            <button type="submit" th:classappend="*{invoice} ? 'disabled' : null" class="btn btn-primary mx-1" title="Save changes">
+                <i class="bi bi-save"></i>
+                Save
+            </button>
+        </div>
+    </form>
+    <div id="addServiceDialog" class="modal" tab-index="-1">
+        <div class="modal-dialog modal-dialog-centered ">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Additional service</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="addServiceForm" class="row g-2">
+                        <input type="hidden" id="addId" name="id" class="add-input">
+                        <div class="col-12 row mb-1">
+                            <label for="addQuantity" class="col-sm-3 col-form-label">Quantity</label>
+                            <div class="col-sm-3">
+                                <input type="number" id="addQuantity" name="quantity" class="form-control text-end px-2 add-input" onchange="updateSubtotal()" required min="0.1" step="0.1">
+                            </div>
+                        </div>
+                        <div class="col-12 row mb-1">
+                            <label for="addService" class="col-sm-3 col-form-label">Service</label>
+                            <div class="col-sm-9">
+                                <select id="addService" name="serviceId" class="form-select add-input" required onchange="updateUnitPrice(this)">
+                                    <option value="" data-pricePerUnit="">Select a service...</option>
+                                    <option th:each="addService: ${additionalServices}"
+                                            th:value="${addService.id}"
+                                            th:text="${addService.name}"
+                                            th:data-pricePerUnit="${addService.pricePerUnit}">
+                                    </option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-12 row mb-1">
+                            <label for="addPricePerUnit" class="col-sm-3 col-form-label">Unit Price</label>
+                            <div class="col-sm-5">
+                                <input type="number" id="addPricePerUnit" name="pricePerUnit" class="form-control text-end px-2 add-input" onchange="updateSubtotal()" min="0.01" step="0.01">
+                            </div>
+                        </div>
+                        <div class="col-12 row mb-1">
+                            <label for="addDescription" class="col-sm-3 col-form-label">Description</label>
+                            <div class="col-sm-9">
+                                <input type="text" id="addDescription" name="description" class="form-control add-input">
+                            </div>
+                        </div>
+                        <div class="col-12 row">
+                            <label for="addSubTotal" class="col-sm-3 col-form-label">SubTotal</label>
+                            <div class="col-sm-5">
+                                <input type="text" id="addSubTotal" name="subTotal" class="fw-semibold form-control-plaintext text-end px-2" value="0.00">
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button id="btnSaveAdditionalService" type="button" class="btn btn-primary">Add additional service
+                        <i class="bi-plus-lg"></i></button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal" id="confirmRemoveDialog" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-sm">
+            <div class="modal-content">
+                <div class="modal-body">
+                    <p>
+                        Do you wish to remove the service?
+                    </p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button id="btnRemoveService" type="button" class="btn btn-danger">Remove</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <template id="newAdditionalServiceRow">
+        <tr data-index="">
+            <td data-field="_quantity" class="text-center"></td>
+            <td data-field="_serviceText"></td>
+            <td data-field="_pricePerUnit" class="px-2 text-end"></td>
+            <td data-field="_description"></td>
+            <td data-field="_subTotal" class="fw-semibold px-2 text-end"></td>
+            <td class="text-center">
+                <button id="_btnEdit" type="button" class="btn btn-sm btn-outline-primary" title="Update/View"><i class="bi-pen"></i></button>
+                <button id="_btnRemove" type="button" class="btn btn-sm btn-outline-danger" title="Remove"><i class="bi-dash-lg"></i></button>
+                <input data-field="_id" type="hidden" id="additionalServices__index__.id" name="additionalServices[__index__].id" value="">
+                <input data-field="_serviceId" type="hidden" id="additionalServices__index__.service" name="additionalServices[__index__].service" value="">
+                <input data-field="_quantity" type="hidden" id="additionalServices__index__.quantity" name="additionalServices[__index__].quantity" value="">
+                <input data-field="_pricePerUnit" type="hidden" id="additionalServices__index__.pricePerUnit" name="additionalServices[__index__].pricePerUnit" value="">
+                <input data-field="_description" type="hidden" id="additionalServices__index__.description" name="additionalServices[__index__].description" value="">
+            </td>
+        </tr>
+    </template>
+</div>
+</body>
+</html>

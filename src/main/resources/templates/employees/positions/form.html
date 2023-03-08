@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html th:replace="~{layouts/mainLayout :: layout(~{:: #otherResources}, ~{:: #content})}" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <th:block id="otherResources">
+        <link rel="stylesheet" href="https://unpkg.com/bootstrap-table@1.21.2/dist/bootstrap-table.min.css">
+        <script src="https://unpkg.com/bootstrap-table@1.21.2/dist/bootstrap-table.min.js"></script>
+    </th:block>
+</head>
+<body>
+    <div id="content" class="col-md-12 col-lg-10 col-xl-8  col-xxl-6">
+        <div class="d-flex align-items-center col-8 border-bottom pb-2 mb-3">
+            <a class="btn btn-secondary" href="/employees/positions" title="Go back to Job Positions table">
+                <i class="bi bi-box-arrow-in-left"></i>
+            </a>
+            <span th:text="${formTitle}" class="fw-semibold px-2">New/Update Job Position</span>
+            <div th:if="${position.id} and ${position.employees.size == 0}" class="form-toolbar d-flex ms-auto">
+                <a class="btn btn-danger" title="Delete this position">
+                    <i class="bi-trash"></i>
+                    <span class="d-none d-sm-inline">Delete</span>
+                </a>
+            </div>
+        </div>
+        <form id="mainForm" class="g-3" th:Object="${position}" th:method="${submitMethod}" th:action="@{${submitURL}}">
+            <input type="hidden" id="id" th:field="*{id}">
+            <div class="col-md-8">
+                <label for="name" class="form-label">Name</label>
+                <div class="input-group has-validation">
+                    <input th:field="*{name}" class="form-control" th:errorclass="is-invalid" id="name" required>
+                    <div id="validationServerNameFeedback" class="invalid-feedback" th:errors="*{name}"> </div>
+                </div>
+            </div>
+            <div th:if="${position.employees.size() > 0}"  class="col-md-8 py-2">
+                <div class="accordion" id="employeesPerPosition">
+                    <div class="accordion-item">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button collapsed p-2" type="button"
+                                    data-bs-toggle="collapse"
+                                    data-bs-target="#employeesList"
+                                    aria-expanded="false"
+                                    aria-controls="employeesList">
+                                Employees assigned to this position
+                            </button>
+                        </h2>
+                        <div class="accordion-collapse collapse" id="employeesList"
+                                    aria-labelledby="employeesList"
+                                    data-bs-parent="#employeesPerPosition">
+                            <div class="accordion-body">
+                                <div class="list-group list-group-flush">
+                                    <a th:each="employee: ${position.employees}"  th:href="@{/employees/update/{id}(id=${employee.id})}" th:text="${employee.getFullName()}" class="list-group-item list-group-item-action" title="Go to employee detail"></a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col mt-2" th:if="*{id}">
+                <div class="form-check form-switch">
+                    <input class="form-check-input" type="checkbox" role="switch" id="active" th:field="*{active}">
+                    <label class="form-check-label" for="active">Active</label>
+                </div>
+            </div>
+            <div class="col-8 d-flex p-2 mt-2">
+                <button class="me-auto btn btn-secondary o-1" title="Clear form" type="reset">
+                    <i class="bi bi-eraser"></i>
+                </button>
+                <a class="btn btn-secondary mx-1"  href="/employees/positions" title="Cancel register and go back">
+                    Cancel
+                </a>
+                <button type="submit" class="btn btn-primary mx-1" title="Save changes">
+                    <i class="bi bi-save"></i>
+                    Save
+                </button>
+            </div>
+        </form>
+    </div>
+</body>
+</html>

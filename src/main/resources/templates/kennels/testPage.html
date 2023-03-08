@@ -1,0 +1,130 @@
+<!--- Rect MySQL INSERT INTO kennelsvgshape  VALUES (1, 128.44, 91.246, 75.246, 155.25, null, 1), (2, 208.01, 90.381, 75.678, 156.11, null, 2), (3, 286.28, 91.246, 64.867, 156.55, null, 3), (4, 127.57, 250.82, 115.46, 128.87, null, 4), (5, 247.79, 250.82, 75.246, 128.87, null, 5), (6, 326.5, 250.39, 74.381, 128, null, 6), (7, 406.93, 250.82, 74.381, 127.57, null, 7), (8, 485.64, 250.39, 62.272, 128.87, null, 8), (9, 553.96, 250.82, 60.542, 101.62, null, 9);--->
+
+<!DOCTYPE html>
+<html th:replace="~{layouts/mainLayout :: layout(~{:: #otherResources}, ~{:: #content})}" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <th:block id="otherResources">
+        <!-- comment from test -->
+        <style>
+        /* Makes kennels change color on hover */
+        .icon:hover {
+            fill: Green;
+            fill-opacity: 0.5;
+        }
+
+        /* The Modal (background) */
+    .modal {
+        display: none; /* Hidden by default */
+        position: fixed; /* Stay in place */
+        z-index: 1; /* Sit on top */
+        padding-top: 100px; /* Location of the box */
+        left: 0;
+        top: 0;
+        width: 100%; /* Full width */
+        height: 100%; /* Full height */
+        overflow: auto; /* Enable scroll if needed */
+        background-color: rgb(0,0,0); /* Fallback color */
+        background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+    }
+
+    /* Modal Content */
+    .modal-content {
+        background-color: #fefefe;
+        margin: auto;
+        padding: 20px;
+        border: 1px solid #888;
+        width: 80%;
+    }
+
+    /* The Close Button */
+    .close {
+        color: #aaaaaa;
+        float: right;
+        font-size: 28px;
+        font-weight: bold;
+    }
+
+    .close:hover,
+    .close:focus {
+        color: #000;
+        text-decoration: none;
+        cursor: pointer;
+    }
+    </style>
+    </th:block>
+</head>
+<body>
+<th:block id="content">
+
+    <div>
+        <a class="btn btn-primary" th:href="@{/kennels/grid}" title="Calendar view">
+            <span class="d-none d-sm-inline">Grid view</span>
+        </a>
+    </div>
+
+
+    <!-- The Modal, only appears when a kenel is clicked -->
+    <div id="myModal" class="modal">
+
+        <!-- Modal content -->
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h1 id="kennelNum"></h1>
+            <p th:each="pet: ${pets}"th:text="${pet.petName}"></p>
+        </div>
+    </div>
+
+
+    <svg width="1110" height="706.5" version="1.1" viewBox="0 0 740 471" xmlns="http://www.w3.org/2000/svg" >   <!--- Sets size for this Scalable Vector Graphic --->
+        <!--- make a container for the image --->
+        <g id="a" transform="translate(370,235.5)">                                                                <!---- Location in project directory --->
+            <image x="-370" y="-235.5" width="740" height="471" fill="#000000" vector-effect="non-scaling-stroke" xlink:href="/img/kennelMap.svg"/>
+        </g>
+
+
+
+        <g th:each="kennel: ${kennels}" th:object="${kennel}" class="icon" fill-opacity="0">
+            <rect th:id="${kennel.id}" th:x="${kennel.kennelSVGShape.getXPos()}" th:y="${kennel.kennelSVGShape.yPos}" th:width="${kennel.kennelSVGShape.width}" th:height="${kennel.kennelSVGShape.height}" th:attr="onclick=|modalClick('*{kennel}')|"/>
+        </g>
+
+
+
+    </svg>
+
+    <script>
+
+// Get the modal
+var modal = document.getElementById("myModal");
+
+// Get the button that opens the modal
+var btn = document.getElementById("myBtn");
+
+// Get the <span> element that closes the modal
+var span = document.getElementsByClassName("close")[0];
+
+// When the user clicks the kennel, open the modal
+function modalClick(kennel) {
+  console.log(kennel);
+  modal.style.display = "block";
+  document.getElementById("kennelNum").innerHTML = "Kennel" + kennel.id;  //Updates kennel id in modal
+}
+
+// When the user clicks on <span> (x), close the modal
+span.onclick = function() {
+  modal.style.display = "none";
+}
+
+// When the user clicks anywhere outside of the modal, close it
+window.onclick = function(event) {
+  if (event.target == modal) {
+    modal.style.display = "none";
+  }
+}
+    </script>
+
+
+</th:block>
+</body>
+</html>

@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html th:replace="~{layouts/mainLayout :: layout(~{:: #otherResources}, ~{:: #content})}" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <th:block id="otherResources">
+        <link rel="stylesheet" href="https://unpkg.com/bootstrap-table@1.21.2/dist/bootstrap-table.min.css">
+        <link rel="stylesheet" href="path/to/bootstrap-datepicker.min.css">
+        <script src="path/to/bootstrap-datepicker.min.js"></script>
+        <script src="https://unpkg.com/bootstrap-table@1.21.2/dist/bootstrap-table.min.js"></script>
+        <script>
+            function filterPets(option){
+            document.location = "/reservations/create?ownerId=" + option.value + '&checkInOnSave='  + [[${checkInOnSave} ? true : false]];
+            }
+        </script>
+    </th:block>
+
+</head>
+<body>
+<div id="content" class="col-md-12 col-lg-10 col-xl-8  col-xxl-6">
+    <form method="post">
+        <div class="row g-2">
+            <div class="form-group col-6 res">
+                <label class="form-label">Owner</label>
+                <select onchange="filterPets(this)" required id="ownerId" name="ownerId" class="form-select">
+                    <option value="">Select a owner...</option>
+                    <option th:selected="${ownerId == owner.id}" th:each=" owner : ${owners}"
+                            th:value="${owner.id}" th:text="${owner.getFullName()}">
+                    </option>
+                </select>
+            </div>
+            <div class="form-group col-6 res">
+                <label class="form-label">Pet</label>
+                <select th:field="${reservation.pet}" th:errorclass="is-invalid" required id="petId" name="petId" class="form-select">
+                    <option value="">Select a pet...</option>
+                    <option th:each=" pet : ${pets}"
+                            th:value="${pet.id}" th:text="${pet.petName}">
+                    </option>
+                </select>
+                <p class="text-danger" th:errors="${reservation.pet}"></p>
+            </div>
+            <div class="form-group col-12 res">
+                <label class="form-label">Stay service</label>
+                <select th:field="${reservation.service}" th:errorclass="is-invalid" required id="serviceId" name="service" class="form-select">
+                    <option value="">Select a service...</option>
+                    <option th:each="service :${services}"
+                            th:value="${service.id}" th:text="${service.name}">
+                    </option>
+                </select>
+                <p class="text-danger" th:errors="${reservation.service}"></p>
+            </div>
+            <div class="form-group col-sm-3 res">
+                <label class="form-label">Start Date</label>
+                <input th:field="${reservation.startDateTime}" th:errorclass="is-invalid" type="date" class="form-control" id="startDate" name="date" data-date-format="mm/dd/yyyy">
+                <p class="text-danger" th:errors="${reservation.startDateTime}"></p>
+            </div>
+            <div  class="form-group col-sm-3 res">
+                <label class="form-label">End Date</label>
+                <input th:field="${reservation.endDateTime}" th:errorclass="is-invalid" type="date" class="form-control" id="endDate" name="date" data-date-format="mm/dd/yyyy">
+                <p class="text-danger" th:errors="${reservation.endDateTime}"></p>
+            </div>
+            <div class="form-group col-12 res">
+                <label class="form-label">Comment</label>
+                <textarea th:field="${reservation.comments}" class="form-control"></textarea>
+                <p class="text-danger" th:errors="${reservation.comments}"></p>
+            </div>
+            <input type="hidden" name="ownerId" th:if="${ownerId}" th:value="${ownerId}">
+            <input type="hidden" name="checkInOnSave" th:if="${checkInOnSave}" th:value="${checkInOnSave}">
+            <div class="form-group col-10 res">
+                <a type="button" class="btn btn-secondary" href="/reservations" title="Cancel reservation">
+                    Cancel
+                </a>
+                <input type="submit" th:value="${checkInOnSave} ? 'Save and Check In' : 'Create'" class="btn btn-primary" title="Add reservation">
+            </div>
+        </div>
+    </form>
+</div>
+</body>
+</html>
