@@ -9,8 +9,8 @@ import java.math.BigDecimal;
 import java.util.Date;
 
 @Repository
-public interface InvoiceRepository extends JPARepositoryActiveFiltering<Invoice, Integer>{
+public interface InvoiceRepository extends JPARepositoryActiveFiltering<Invoice, Integer> {
 
-    @Query( value = "SELECT MAX(i.number) + 1 FROM Invoice i WHERE YEAR(i.date) = YEAR(:date)", nativeQuery = true)
+    @Query(value = "SELECT MAX(i.number) + 1 FROM invoice i WHERE YEAR(i.date) = YEAR(:date)", nativeQuery = true)
     public BigDecimal findNextNumberByDate(@Param("date") Date date);
 }
