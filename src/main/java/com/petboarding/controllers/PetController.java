@@ -46,13 +46,12 @@ public class PetController extends AppBaseController {
 
     }
 
-    @GetMapping("/showNewPetForm")
-    public String showNewPetForm(Boolean showAll, Model model) {
-        // create model attribute to bind form data
+    @GetMapping("/add")
+    public String showNewPetForm(Model model) {
         Pet pet = new Pet();
         model.addAttribute("pet", pet);
-        model.addAttribute("parents", ownerRepository.findAll()); // Grab all Owners
-        return "pets/new_pet";
+        model.addAttribute("owners", ownerRepository.findByActive(true));
+        return "pets/form";
     }
 
     @GetMapping("/showNewPetForm/{ownerId}")
