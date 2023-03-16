@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html th:replace="~{layouts/mainLayout :: layout(~{:: #otherResources}, ~{:: #content})}"
+   xmlns:th="https://www.thymeleaf.org/">
+
+<head>
+   <meta charset="utf-8">
+   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+   <th:block id="otherResources">
+      <link rel="stylesheet" href="https://unpkg.com/bootstrap-table@1.21.2/dist/bootstrap-table.min.css">
+      <script src="https://unpkg.com/bootstrap-table@1.21.2/dist/bootstrap-table.min.js"></script>
+      <script th:src="@{/js/uiUtils.js}"></script>
+   </th:block>
+
+
+</head>
+
+<body>
+   <th:block id="content">
+      <div id="toolbar" class="d-flex">
+         <a th:href="@{/pets/add}" class="btn btn-primary" title="Add new pet">
+            <i class="bi bi-plus-lg"></i>
+            <span class="d-none d-sm-inline">Add Pet</span>
+         </a>
+
+      </div>
+
+      <table class="table-striped text-capitalize" id="petTable" data-toggle="table" data-search="true"
+         data-pagination="true" data-show-columns="true" data-show-toggle="true" data-toolbar="#toolbar"
+         th:data-buttons="${showAll} ? 'tableFilterShowActive' : 'tableFilterShowAll'">
+         <thead>
+            <tr>
+               <th data-halign="center" data-sortable="true">Pet Name</th>
+               <th data-halign="center" data-sortable="true">Owner</th>
+               <th data-halign="center" data-sortable="true">Breed</th>
+               <th data-halign="center">Notes</th>
+               <th data-halign="center">Actions</th>
+            </tr>
+         </thead>
+         <tbody>
+            <tr th:each="pet: ${pets}" th:object="${pet}" th:class="*{active} ? null : 'inactive'">
+               <td><a class="link-primary" th:href="@{/pets/profile/{id} (id=*{id})}" th:text="${pet.petName}"></a></td>
+               <td th:text="${pet.owner?.getFullName()}"></td> <!--- ? acts as if owner then owner.firstName --->
+               <td th:text="${pet.breed}"></td>
+               <td th:text="${pet.notes}"></td>
+               <td>
+                  <a th:href="@{/pets/showFormForUpdate/{id}(id=*{id})}" class="btn btn-sm btn-primary"><i
+                        class="bi-pen"></i></a>
+                  <a th:href="@{/pets/deletePet/{id}(id=${pet.id})}" class="btn btn-sm btn-danger"><i
+                        class="bi-trash"></i></a>
+               </td>
+            </tr>
+         </tbody>
+      </table>
+   </th:block>
+</body>
+
+</html>

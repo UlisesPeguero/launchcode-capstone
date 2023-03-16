@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html th:replace="~{layouts/mainLayout :: layout(~{:: #otherResources}, ~{:: #content})}" lang="en"
+    xmlns:th="https://www.thymeleaf.org/">
+
+<head>
+
+    <th:block id="otherResources">
+        <script th:src="@{/js/petScript.js}"></script>
+        <script src="/js/uiUtils.js"></script>
+    </th:block>
+</head>
+
+<body>
+
+    <th:block id="content">
+        <div class="d-flex">
+
+            <main class="col-md-12 col-lg-10 col-xl-8  col-xxl-6">
+                <div>
+                    <h1>New Pet Form</h1>
+                    <hr>
+
+                    <form action="#" th:action="@{/savePet}" th:object="${pet}" method="POST"
+                        enctype="multipart/form-data">
+                        <label class="form-label">Name</label>
+                        <input type="text" th:field="*{petName}" placeholder="Pet Name" class="form-control mb-4 col-4">
+                        <p class="error text-danger" th:errors="${pet.petName}"></p>
+                        <!--- Changed to dropdown selection of existing owners -->
+                        <label class="form-label">Owner</label>
+                        <select name="ownerId" id="ownerId" placeholder="Owner" th:field="*{owner}"
+                            class="form-control mb-4 col-4">
+                            <option th:each="owner: ${parents}" th:value="${owner.id}" th:text="${owner.getFullName()}">
+                            </option>
+                        </select>
+
+                        <p class="error text-danger" th:errors=${pet.owner}></p>
+                        <label class="form-label">Breed</label>
+                        <select name="dogDropdown" id="dogDropList" placeholder="Breed" th:field="*{breed}"
+                            class="form-select mb-4 col-4"></select>
+                        <p class="error text-danger" th:errors="${pet.breed}"></p>
+                        <label class="form-label">Notes</label>
+                        <input type="text" th:field="*{notes}" placeholder="Notes" class="form-control mb-4 col-4">
+
+                        <button type="submit" class="btn btn-info">Save Pet</button>
+                        <!--                TODO: redo styling, place in empty white space with image preview-->
+                        <div class="col-12 mb-3">
+                            <label for="photo" class="form-label">Photo</label>
+                            <input type="file" name="image" value="image" class="form-control" id="photo"
+                                onchange="displayPhotoPreview(event.target, 'photoPreview')"
+                                accept="image/png, image/jpeg">
+                        </div>
+                        <div class="col-md-6 d-flex justify-content-center align-content-center">
+                            <input type="hidden" th:field="*{photo}">
+                            <img id="photoPreview" alt="Photo preview" th:src="*{getPhotoPath()}"
+                                class="preview-photo img-thumbnail" th:style="*{photo} ? '' : 'display: none;'">
+                        </div>
+                    </form>
+                    <hr>
+                    <a th:href="@{/pets}">Back to Pet List</a>
+                </div>
+            </main>
+        </div>
+
+    </th:block>
+</body>
+
+</html>

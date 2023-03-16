@@ -4,7 +4,7 @@ import com.petboarding.models.Owner;
 import com.petboarding.models.Pet;
 import com.petboarding.models.app.Module;
 import com.petboarding.controllers.utils.FileUploadUtil;
-import com.petboarding.models.data.OwnerRepository;     // Needed to Grab Owners
+import com.petboarding.models.data.OwnerRepository; // Needed to Grab Owners
 import com.petboarding.models.data.PetRepository;
 import com.petboarding.models.data.ReservationRepository;
 import com.petboarding.service.PetService;
@@ -23,87 +23,87 @@ import java.io.IOException;
 import java.util.Optional;
 
 @Controller
-
-
+@RequestMapping("pets")
 public class PetController extends AppBaseController {
 
     @Autowired
     private PetService petService;
 
+    @Autowired
+    private PetRepository petRepository;
 
-    @Autowired   // Needed to grab owners
+    @Autowired // Needed to grab owners
     private OwnerRepository ownerRepository;
 
     @Autowired
     private ReservationRepository reservationRepository;
 
-
-    // display list of pets page
-    @GetMapping("/pets")
+    @GetMapping
     public String viewPetPage(@RequestParam(required = false, defaultValue = "false") Boolean showAll, Model model) {
-        model.addAttribute("listPets", showAll ? petService.getAllPets() : petService.findByActive(true));
+        model.addAttribute("pets", showAll ? petRepository.findAll() : petRepository.findByActive(true));
         model.addAttribute("showAll", showAll);
-        return "pets/petPage";
+        return "pets/index";
 
     }
 
-    @GetMapping("/showNewPetForm")
-    public String showNewPetForm(Boolean showAll, Model model) {
-        // create model attribute to bind form data
+    @GetMapping("/add")
+    public String showNewPetForm(Model model) {
         Pet pet = new Pet();
         model.addAttribute("pet", pet);
-        model.addAttribute("parents", ownerRepository.findAll());       // Grab all Owners
-        return "pets/new_pet";
+        model.addAttribute("owners", ownerRepository.findByActive(true));
+        return "pets/form";
     }
+
     @GetMapping("/showNewPetForm/{ownerId}")
     public String showNewPetFormFromOwner(Model model, @PathVariable int ownerId) {
         // create model attribute to bind form data
         Pet pet = new Pet();
         model.addAttribute("pet", pet);
         Optional optOwner = ownerRepository.findById(ownerId);
-        if(optOwner.isPresent()) {
+        if (optOwner.isPresent()) {
             Owner owner = (Owner) optOwner.get();
-            model.addAttribute("parents", owner);       // Grab specific Owner
+            model.addAttribute("parents", owner); // Grab specific Owner
             return "pets/new_pet";
         } else {
-            return"redirect:../owners";
+            return "redirect:../owners";
         }
     }
 
     @Transactional
     @PostMapping("/savePet")
-    public String savePet(@ModelAttribute("pet") @Valid Pet pet, Errors errors, Model model, @RequestParam(value = "image", required = false) MultipartFile multipartFile) throws IOException {
+    public String savePet(@ModelAttribute("pet") @Valid Pet pet, Errors errors, Model model,
+            @RequestParam(value = "image", required = false) MultipartFile multipartFile) throws IOException {
         // save pet to database
         if (errors.hasErrors()) {
-            model.addAttribute("parents", ownerRepository.findAll());   //Keeps Owner data on page
+            model.addAttribute("parents", ownerRepository.findAll()); // Keeps Owner data on page
             return "pets/new_pet";
         }
-//        petService.savePet(pet);
+        // petService.savePet(pet);
         String fileName = StringUtils.cleanPath(multipartFile.getOriginalFilename());
 
         if (pet.getId() != null) {
-        Optional<Pet> optPet = Optional.ofNullable(petService.getPetById(pet.getId()));
-        Optional<String> photo = Optional.ofNullable(optPet.get().getPhoto());
-        if (optPet.isPresent()) {
-            if (photo.isPresent()) {
-                if("".equals(optPet.get().getPhoto())) {
-                    optPet.get().setPhoto(null);
+            Optional<Pet> optPet = Optional.ofNullable(petService.getPetById(pet.getId()));
+            Optional<String> photo = Optional.ofNullable(optPet.get().getPhoto());
+            if (optPet.isPresent()) {
+                if (photo.isPresent()) {
+                    if ("".equals(optPet.get().getPhoto())) {
+                        optPet.get().setPhoto(null);
+                    }
                 }
-            }
-            if (!"".equals(fileName)){
-                String uploadDir = "uploads/pet-photos/" + pet.getId();
-                    if (photo.isPresent()){
+                if (!"".equals(fileName)) {
+                    String uploadDir = "uploads/pet-photos/" + pet.getId();
+                    if (photo.isPresent()) {
                         FileUploadUtil.deletePhoto(uploadDir, photo.get());
                     }
-            FileUploadUtil.saveFile(uploadDir, fileName, multipartFile);
-            pet.setPhoto(fileName);
-            petService.savePet(pet);
+                    FileUploadUtil.saveFile(uploadDir, fileName, multipartFile);
+                    pet.setPhoto(fileName);
+                    petService.savePet(pet);
+                }
             }
-        }
         } else {
-                petService.savePet(pet);
-                pet.setPhoto(null);
-            if (!fileName.equals("")){
+            petService.savePet(pet);
+            pet.setPhoto(null);
+            if (!fileName.equals("")) {
                 String uploadDir = "uploads/pet-photos/" + pet.getId();
                 FileUploadUtil.saveFile(uploadDir, fileName, multipartFile);
                 pet.setPhoto(fileName);
@@ -114,20 +114,21 @@ public class PetController extends AppBaseController {
     }
 
     @GetMapping("/showFormForUpdate/{id}")
-        // show update form for id chosen
+    // show update form for id chosen
     public String showFormForUpdate(@PathVariable(value = "id") Integer id, Model model) {
         Pet pet = petService.getPetById(id);
         // set pet model to form
         model.addAttribute("pet", pet);
         return "pets/update_pet";
     }
+
     @GetMapping("/deletePet/{id}")
-    public String deletePet(@PathVariable (value = "id") Integer id, RedirectAttributes redirectAttributes) {
+    public String deletePet(@PathVariable(value = "id") Integer id, RedirectAttributes redirectAttributes) {
         // dont delete if active
-        if(reservationRepository.findByPetId(id).size() > 0) {
+        if (reservationRepository.findByPetId(id).size() > 0) {
             redirectAttributes.addFlashAttribute("errorMessage", "Pet with active reservation can not be deleted!");
             Optional<Pet> optionalPet = Optional.ofNullable(petService.getPetById(id));
-            if(optionalPet.isPresent()) {
+            if (optionalPet.isPresent()) {
                 Pet pet = optionalPet.get();
                 pet.setActive(false);
             }
@@ -139,9 +140,10 @@ public class PetController extends AppBaseController {
     }
 
     @GetMapping("pets/profile/{id}")
-    public String displayEmployeeProfile(@PathVariable("id") Integer id, Model model, RedirectAttributes redirectAttributes){
+    public String displayEmployeeProfile(@PathVariable("id") Integer id, Model model,
+            RedirectAttributes redirectAttributes) {
         Optional<Pet> optPet = Optional.ofNullable(petService.getPetById(id));
-        if(optPet.isEmpty()) {
+        if (optPet.isEmpty()) {
             redirectAttributes.addFlashAttribute("errorMessage", "The Pet ID:" + id + " couldn't be found.");
             return "redirect:/pets";
         }
@@ -153,6 +155,5 @@ public class PetController extends AppBaseController {
     public Module addActiveModule() {
         return getActiveModule("pets");
     }
-
 
 }
