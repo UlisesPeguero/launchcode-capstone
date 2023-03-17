@@ -1,6 +1,5 @@
 package com.petboarding.models;
 
-
 import javax.persistence.*;
 import javax.validation.constraints.NotBlank;
 
@@ -8,65 +7,78 @@ import javax.validation.constraints.NotBlank;
 @Table(name = "pets")
 public class Pet extends AbstractEntity {
 
-    @NotBlank(message = "Enter pet name!")
-    @Column(name = "pet_name")
-    private String petName;
+    @NotBlank(message = "Name cannot be empty.")
+    private String name;
 
+    @ManyToOne // Sets up relationship
+    private Owner owner; // Parents -> Owner
 
-//    @NotBlank(message = "Enter parent name!")     // Some Not Blank error?
-    @ManyToOne                                      // Sets up relationship
-    private Owner owner;                            // Parents -> Owner
+    @NotBlank(message = "Select a valid breed.")
+    @OneToMany
+    @JoinColumn(name = "breed_id")
+    private Breed breed;
 
-    @NotBlank(message = "Enter breed type!")
-    @Column(name = "breed")
-    private String breed;
-    @Column(name = "notes")
     private String notes;
+
     @Column(nullable = true, length = 64)
     private String photo;
 
     @Column(columnDefinition = "boolean default true")
     private Boolean active = true;
 
-
     @Transient
     public String getPhotoPath() {
-        if (photo == null || getId() == 0) {return null;}
+        if (photo == null || getId() == 0) {
+            return null;
+        }
         return "/uploads/pet-photos/" + getId() + "/" + photo;
     }
 
-    public Pet(String petName, Owner owner, String breed, String notes, Boolean active) {
+    public Pet(String petName, Owner owner, Breed breed, String notes, Boolean active) {
         super();
-        this.petName = petName;
-        this.owner = owner;                         // Parents -> Owner
+        this.name = petName;
+        this.owner = owner; // Parents -> Owner
         this.breed = breed;
         this.notes = notes;
         this.active = active;
     }
 
-    public Pet(){}
+    public Pet() {
+    }
 
-    public String getPetName() {
-        return petName;
+    public String gePetName() {
+        return name;
     }
 
     public void setPetName(String petName) {
-        this.petName = petName;
+        this.name = petName;
+    }
+
+    public String getName() {
+        return this.name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public Boolean isActive() {
+        return this.active;
     }
 
     public Owner getOwner() {
         return this.owner;
-    }                   // Parents -> Owner
+    } // Parents -> Owner
 
-    public void setOwner(Owner owner) {                             // Parents -> Owner
+    public void setOwner(Owner owner) { // Parents -> Owner
         this.owner = owner;
     }
 
-    public String getBreed() {
+    public Breed getBreed() {
         return breed;
     }
 
-    public void setBreed(String breed) {
+    public void setBreed(Breed breed) {
         this.breed = breed;
     }
 
@@ -78,9 +90,13 @@ public class Pet extends AbstractEntity {
         this.notes = notes;
     }
 
-    public String getPhoto() {return photo;}
+    public String getPhoto() {
+        return photo;
+    }
 
-    public void setPhoto(String photo) {this.photo = photo;}
+    public void setPhoto(String photo) {
+        this.photo = photo;
+    }
 
     @Override
     public Boolean getActive() {
